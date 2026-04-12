@@ -29,17 +29,29 @@
 - [x] 更新 `program.md` - 完整的三层架构说明
 - [x] 更新 `.gitignore` - 添加输出目录忽略规则
 - [x] 初始提交到 git (commit: 323bccb)
+- [x] **实现 lv1_macro 五种超分辨率方法**
+  - 01_baseline_bicubic: 双三次插值基线
+  - 02_baseline_srcnn: SRCNN (2015)
+  - 03_method_edsr: EDSR (2017)
+  - 04_method_pftsr: PFT-SR (自定义)
+  - 05_method_swinir: SwinIR (2021)
+- [x] 创建 `compare.py` - 统一比较入口
+- [x] 创建 `lv1_macro/select_best.py` - 最佳方法选择
 
 ## 待办清单
 
 ### lv1_macro - 宏观层
-- [ ] 收集候选方法代码
-  - [ ] 01_baseline_bicubic (双三次插值)
-  - [ ] 02_baseline_srcnn (SRCNN)
-  - [ ] 03_method_edsr (EDSR)
-  - [ ] 04_method_pftsr (PFT-SR，已有)
-  - [ ] 05_method_swinir (SwinIR)
-- [ ] 实现统一接口适配
+- [x] 收集候选方法代码
+  - [x] 01_baseline_bicubic (双三次插值)
+  - [x] 02_baseline_srcnn (SRCNN)
+  - [x] 03_method_edsr (EDSR)
+  - [x] 04_method_pftsr (PFT-SR)
+  - [x] 05_method_swinir (SwinIR)
+  - [x] 06_method_tinynina (TinyNina Edge-AI)
+  - [x] 07_method_m2ir (Mamba SSM)
+  - [x] 08_method_realrestorer (真实世界退化)
+  - [x] 09_method_lcmsr (潜空间一致性)
+- [x] 实现统一接口适配
 - [ ] 运行宏观比较 (CH07)
 - [ ] 选择最佳方法进入 lv2_micro
 
@@ -63,11 +75,29 @@
 
 | 日期 | 方法 | val_psnr | val_ssim | 参数量 | 状态 |
 |------|------|----------|----------|--------|------|
-| - | 01_baseline_bicubic | - | - | 0 | 待运行 |
-| - | 02_baseline_srcnn | - | - | - | 待运行 |
-| - | 03_method_edsr | - | - | - | 待运行 |
-| - | 04_method_pftsr | - | - | 2.8M | 待运行 |
-| - | 05_method_swinir | - | - | - | 待运行 |
+| - | 01_baseline_bicubic | - | - | 0 | ✅ 已完成 |
+| - | 02_baseline_srcnn | - | - | ~20K | ✅ 已完成 |
+| - | 03_method_edsr | - | - | ~1.5M | ✅ 已完成 |
+| - | 04_method_pftsr | - | - | ~2.8M | ✅ 已完成 |
+| - | 05_method_swinir | - | - | ~1M | ✅ 已完成 |
+| - | 06_method_tinynina | - | - | ~50K | ✅ 已完成 |
+| - | 07_method_m2ir | - | - | ~500K | ✅ 已完成 |
+| - | 08_method_realrestorer | - | - | ~800K | ✅ 已完成 |
+| - | 09_method_lcmsr | - | - | ~1.2M | ✅ 已完成 |
+
+**9种方法架构对比：**
+
+| 编号 | 方法 | 架构类型 | 核心特点 | 论文来源 |
+|------|------|----------|----------|----------|
+| 01 | bicubic | 传统插值 | 无参数基线 | 经典 |
+| 02 | SRCNN | CNN先驱 | 3层卷积 | CVPR 2015 |
+| 03 | EDSR | CNN优化 | 无BN、残差缩放 | CVPRW 2017 |
+| 04 | PFT-SR | CNN+Attention | 渐进特征转移 | 自定义 |
+| 05 | SwinIR | Transformer | 移位窗口注意力 | ICCV 2021 |
+| 06 | TinyNina | Edge-AI CNN | 深度可分离、通道门控 | ArXiv 2604.04445 |
+| 07 | M2IR | Mamba SSM | 选择性状态扫描 | ArXiv 2603.14816 |
+| 08 | RealRestorer | 真实世界退化 | 退化估计+条件残差 | 2026 |
+| 09 | LCMSR | 扩散模型 | 潜空间一致性、单步推理 | ArXiv 2503.19505 |
 
 ### lv2_micro - 微观优化
 
