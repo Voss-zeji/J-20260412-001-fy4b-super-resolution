@@ -63,9 +63,9 @@ def run_method(method_name: str):
     env['MAX_STEPS_PER_EPOCH'] = str(MAX_STEPS_PER_EPOCH)
     env['PYTHONUNBUFFERED'] = '1'
 
-    # 构建命令 - 使用timeout限制总时间（5分钟）
+    # 构建命令 - 使用timeout限制总时间（30分钟）
     cmd = [
-        'timeout', '300',  # 5分钟总超时
+        'timeout', '1800',  # 30分钟总超时
         sys.executable, '-u',  # 无缓冲
         str(main_py),
         '--band', BAND,
@@ -165,7 +165,7 @@ def main():
     print("="*60)
     print("FY4B Super Resolution - lv1_macro 批量运行 v2")
     print(f"每个方法: 最多 {MAX_EPOCHS} epochs x {MAX_STEPS_PER_EPOCH} steps")
-    print(f"总时间限制: 5分钟/方法")
+    print(f"总时间限制: 30分钟/方法")
     print("="*60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
