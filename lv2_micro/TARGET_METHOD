@@ -1,0 +1,7 @@
+# 当前微观层优化目标
+# 由 lv1_macro/select_best.py 自动写入
+# 格式：方法目录名（如 04_method_pftsr）
+
+# 初始为空，运行 select_best.py 后自动填充
+# 或手动指定：
+# 04_method_pftsr

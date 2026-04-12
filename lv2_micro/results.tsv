@@ -1,0 +1,3 @@
+experiment	val_psnr	memory_gb	status	description
+# 示例行（删除此行后使用）
+# 20260412_baseline	34.15	4.5	keep	edsr baseline from lv1

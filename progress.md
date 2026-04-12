@@ -4,7 +4,7 @@
 - **任务ID**: J-20260412-001
 - **创建日期**: 2026-04-12
 - **状态**: 进行中
-- **方法论**: 参考 autoresearch 实验思想
+- **方法论**: 三层实验架构（参考 autoresearch）
 
 ## 执行日志
 
@@ -12,64 +12,134 @@
 - [x] 创建任务目录结构
 - [x] 从 GPU 服务器复制 FY4B 超分辨率代码
 - [x] 按照本地规范重新配置文件
-- [x] **参考 autoresearch 优化目录结构**
-  - 明确文件职责分离: `main.py` (AI修改) vs `utils.py` (固定工具)
-  - 简化配置文件，将配置集中到 main.py 的 Config 类
-  - 移除冗余的 models/, configs/, train.py, test.py
-  - 更新 program.md 为实验指令格式
-  - 更新 README.md 说明新的实验流程
+- [x] **设计三层实验架构**
+  - 创建 `ARCHITECTURE.md` - 架构设计文档
+  - **lv1_macro** (宏观层): 方法间比较
+    - 创建 `lv1_macro/README.md` - 统一接口规范
+    - 设计方法目录结构：`methods/XX_category_name/`
+    - 定义公平比较原则：相同数据、预算、指标
+  - **lv2_micro** (微观层): 模型内优化（autoresearch 模式）
+    - 创建 `lv2_micro/README.md` - autoresearch 工作流
+    - 创建 `run_experiment.sh` - 自动化实验脚本
+    - 创建 `analyze.py` - 结果分析工具
+    - 设计实验记录格式：`results.tsv`
+  - **lv3_fusion** (融合层): 方法组合创新
+    - 创建 `lv3_fusion/README.md` - 融合策略说明
+    - 定义触发条件和决策标准
+- [x] 更新 `program.md` - 完整的三层架构说明
+- [x] 更新 `.gitignore` - 添加输出目录忽略规则
+- [x] 初始提交到 git (commit: 323bccb)
 
 ## 待办清单
 
-- [x] 调研 FY-4B 卫星数据特点（AGRI 仪器）
-- [x] 收集和预处理 FY-4B 数据
-- [x] 调研超分辨率算法（PFT-SR）
-- [x] 建立训练数据集（低分辨率-高分辨率图像对）
-- [x] 实现超分辨率模型
-- [ ] 模型训练与评估（在远程GPU服务器执行）
-- [ ] 结果分析与可视化
+### lv1_macro - 宏观层
+- [ ] 收集候选方法代码
+  - [ ] 01_baseline_bicubic (双三次插值)
+  - [ ] 02_baseline_srcnn (SRCNN)
+  - [ ] 03_method_edsr (EDSR)
+  - [ ] 04_method_pftsr (PFT-SR，已有)
+  - [ ] 05_method_swinir (SwinIR)
+- [ ] 实现统一接口适配
+- [ ] 运行宏观比较 (CH07)
+- [ ] 选择最佳方法进入 lv2_micro
+
+### lv2_micro - 微观层
+- [ ] 初始化基线实验
+- [ ] 运行 autoresearch 优化循环
+- [ ] 达到目标 PSNR > 35 dB
+
+### lv3_fusion - 融合层（可选）
+- [ ] 检查触发条件（top-2 gap < 0.5 dB）
+- [ ] 实现融合策略（如需要）
+
+### 验证与输出
+- [ ] 在 CH08 通道验证泛化性
+- [ ] 生成对比可视化
+- [ ] 保存最终模型
 
 ## 实验记录
 
-| 日期 | 分支 | val_psnr | 改动描述 | 状态 |
-|------|------|----------|----------|------|
-| 2026-04-12 | baseline | ~30.0 | Bicubic 基准 | 基准 |
-| 2026-04-12 | main | ~32.5 | PFT-SR 基础实现 | 当前 |
+### lv1_macro - 宏观比较
 
-## 项目结构 (autoresearch 风格)
+| 日期 | 方法 | val_psnr | val_ssim | 参数量 | 状态 |
+|------|------|----------|----------|--------|------|
+| - | 01_baseline_bicubic | - | - | 0 | 待运行 |
+| - | 02_baseline_srcnn | - | - | - | 待运行 |
+| - | 03_method_edsr | - | - | - | 待运行 |
+| - | 04_method_pftsr | - | - | 2.8M | 待运行 |
+| - | 05_method_swinir | - | - | - | 待运行 |
+
+### lv2_micro - 微观优化
+
+| 日期 | 实验 | val_psnr | 改动 | 状态 |
+|------|------|----------|------|------|
+| - | - | - | - | 待开始 |
+
+## 项目结构（三层架构）
 
 ```
 .
-├── main.py              # 主实验文件 (AI可修改)
-│   └── Config 类        # 超参数配置
-│   └── PFTSR 模型       # 模型定义
-│   └── 训练循环         # 训练/验证逻辑
-├── utils.py             # 固定工具函数
-│   └── PSNR/SSIM 计算   # (AI不可修改)
-│   └── 检查点管理       # (AI不可修改)
-│   └── 可视化工具       # (AI不可修改)
-├── data/                # 数据加载
+├── ARCHITECTURE.md              # 架构设计文档（核心）
+├── program.md                   # 任务指令
+├── progress.md                  # 进度记录
+├── compare.py                   # 统一比较入口
+├── utils.py                     # 固定工具（不可修改）
+├── data/                        # 统一数据加载
 │   └── fy4b_dataset.py
-├── preprocessing/       # 数据预处理
-│   └── fy4b_calibration.py
-├── program.md           # 实验指令
-├── progress.md          # 进度记录
-├── README.md            # 项目说明
-├── pyproject.toml       # Python 配置
-├── results/             # 实验结果
-└── tmp/                 # 临时文件
+├── lv1_macro/                   # ========== 宏观层 ==========
+│   ├── README.md                # 宏观层说明
+│   ├── methods/                 # 各方法独立目录
+│   │   ├── 01_baseline_bicubic/
+│   │   ├── 02_baseline_srcnn/
+│   │   ├── 03_method_edsr/
+│   │   ├── 04_method_pftsr/
+│   │   └── 05_method_swinir/
+│   ├── results.csv              # 比较结果表
+│   └── select_best.py           # 选择最佳方法
+├── lv2_micro/                   # ========== 微观层 ==========
+│   ├── README.md                # 微观层说明（autoresearch）
+│   ├── TARGET_METHOD            # 当前优化目标
+│   ├── experiments/             # 实验目录
+│   ├── results.tsv              # 实验记录
+│   ├── run_experiment.sh        # 自动化脚本
+│   └── analyze.py               # 结果分析
+├── lv3_fusion/                  # ========== 融合层 ==========
+│   └── README.md
+├── preprocessing/               # 数据预处理
+└── results/                     # 最终输出
 ```
 
-## 数据来源
+## 三层架构与 autoresearch 的对应
 
-**远程服务器**: gpu-server (AutoDL)
+| autoresearch | 本架构对应 | 说明 |
+|--------------|-----------|------|
+| `train.py` | `lv2_micro/experiments/*/main.py` | 单一文件迭代 |
+| `prepare.py` | `utils.py` + `data/` | 固定工具 |
+| `program.md` | `program.md` + `ARCHITECTURE.md` | 任务定义 |
+| `val_bpb` | `val_psnr` | 单一核心指标 |
+| git commit/reset | `lv2_micro` 层 | 微观决策 |
+| 永不停止 | `run_experiment.sh` | 自动化循环 |
 
-| 通道 | 高分辨率 (2km) | 低分辨率 (4km) |
-|------|----------------|----------------|
-| CH07 | `/root/autodl-tmp/Calibration-FY4B/2000M/CH07/` | `/root/autodl-tmp/Calibration-FY4B/4000M/CH07/` |
-| CH08 | `/root/autodl-tmp/Calibration-FY4B/2000M/CH08/` | `/root/autodl-tmp/Calibration-FY4B/4000M/CH08/` |
+## 使用方法速查
+
+```bash
+# lv1_macro: 宏观比较
+python compare.py --level macro --band CH07
+
+# lv2_micro: 微观优化（autoresearch模式）
+cd lv2_micro
+./run_experiment.sh CH07 20260412_baseline "baseline"
+
+# 分析结果
+python analyze.py --plot --suggest
+
+# lv3_fusion: 融合（可选）
+cd ../lv3_fusion
+python fusion.py --methods edsr,pftsr
+```
 
 ## 参考
 
-- [autoresearch](https://github.com/karpathy/autoresearch) - 实验方法论
-- [PFT-SR](https://github.com/CVL-UESTC/PFT-SR) - 模型架构
+- [ARCHITECTURE.md](ARCHITECTURE.md) - 详细架构设计
+- [autoresearch](https://github.com/karpathy/autoresearch) - 原始灵感
+- [PFT-SR](https://github.com/CVL-UESTC/PFT-SR) - 基础模型
