@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Output
+output/
+
+# Temporary files
+tmp/
+*.tmp
+.cache/
+
+# Data files
+data/
+*.hdf
+*.h5
+*.nc
+*.tif
+*.tiff
+
+# Model checkpoints
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+
+# Logs
+logs/
+*.log
+
+# Results
+results/*
+!results/.gitkeep
+
+# TensorBoard
+tf-logs/
