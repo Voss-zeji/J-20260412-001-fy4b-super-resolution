@@ -149,8 +149,8 @@ class CalibrationDataTester:
                 for sample in samples:
                     try:
                         with h5py.File(sample, 'r') as f:
-                            # 检查数据集存在
-                            channel_key = ch.replace("CH", "Channel")
+                            # 检查数据集存在 (实际使用CH07而不是Channel07)
+                            channel_key = ch  # 直接使用CH07/CH08
                             if channel_key not in f:
                                 self.log(f"{os.path.basename(sample)}: 缺少{channel_key}数据集", "ERROR")
                                 continue
@@ -199,7 +199,7 @@ class CalibrationDataTester:
                     continue
 
                 samples = files[:min(sample_size, len(files))]
-                channel_key = ch.replace("CH", "Channel")
+                channel_key = ch  # 直接使用CH07/CH08
 
                 for sample in samples:
                     try:

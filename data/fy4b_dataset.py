@@ -185,11 +185,18 @@ class FY4BDataset(Dataset):
             return data
         
         # 从实际HDF文件读取数据
+        # 支持两种key格式: Channel07 或 CH07
+        channel_key_map = {
+            'Channel07': 'CH07',
+            'Channel08': 'CH08'
+        }
+        actual_channel = channel_key_map.get(channel, channel)
+
         with h5py.File(filepath, 'r') as f:
-            if channel not in f:
+            if actual_channel not in f:
                 raise KeyError(f"通道 {channel} 不在文件 {filepath} 中")
             
-            data = f[channel][()]
+            data = f[actual_channel][()]
             
             # 处理NaN值（使用邻近有效值填充或替换为平均值）
             if np.any(~np.isfinite(data)):
