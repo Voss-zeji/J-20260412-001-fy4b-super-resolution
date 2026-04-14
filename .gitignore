@@ -51,3 +51,9 @@ results/*
 
 # TensorBoard
 tf-logs/
+
+# Secrets / Local config
+send_feishu.py
+*.env
+.env
+settings.local.json
