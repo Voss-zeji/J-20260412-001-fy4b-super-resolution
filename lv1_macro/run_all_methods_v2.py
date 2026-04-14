@@ -15,8 +15,8 @@ from pathlib import Path
 # 配置
 METHODS_DIR = Path(__file__).parent / "methods"
 RESULTS_DIR = Path(__file__).parent / "results"
-MAX_STEPS_PER_EPOCH = 100  # 每个epoch最多100步
-MAX_EPOCHS = 10  # 最多10个epoch
+MAX_STEPS_PER_EPOCH = 1000  # 每个epoch最多1000步（实际由数据量决定）
+MAX_EPOCHS = 50  # 最多50个epoch
 BAND = "CH07"
 
 # 方法列表（按顺序）
@@ -55,21 +55,22 @@ def run_method(method_name: str):
     print(f"\n{'='*60}")
     print(f"开始运行: {method_name}")
     print(f"开始时间: {start_timestamp}")
-    print(f"计划: 最多 {MAX_EPOCHS} epochs x {MAX_STEPS_PER_EPOCH} steps")
+    print(f"计划: 最多 {MAX_EPOCHS} epochs")
+    print(f"时间限制: 45 分钟")
     print(f"{'='*60}")
 
-    # 使用环境变量传递限制参数
+    # 设置环境变量
     env = os.environ.copy()
-    env['MAX_STEPS_PER_EPOCH'] = str(MAX_STEPS_PER_EPOCH)
     env['PYTHONUNBUFFERED'] = '1'
 
-    # 构建命令 - 使用timeout限制总时间（30分钟）
+    # 构建命令 - 使用timeout限制总时间（45分钟）
     cmd = [
-        'timeout', '1800',  # 30分钟总超时
+        'timeout', '2700',  # 45分钟总超时
         sys.executable, '-u',  # 无缓冲
         str(main_py),
         '--band', BAND,
         '--epochs', str(MAX_EPOCHS),
+        '--batch-size', '8',  # 降低batch size避免OOM
         '--output', str(output_file),
     ]
 
@@ -164,8 +165,8 @@ def run_method(method_name: str):
 def main():
     print("="*60)
     print("FY4B Super Resolution - lv1_macro 批量运行 v2")
-    print(f"每个方法: 最多 {MAX_EPOCHS} epochs x {MAX_STEPS_PER_EPOCH} steps")
-    print(f"总时间限制: 30分钟/方法")
+    print(f"每个方法: 最多 {MAX_EPOCHS} epochs")
+    print(f"总时间限制: 45分钟/方法")
     print("="*60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)

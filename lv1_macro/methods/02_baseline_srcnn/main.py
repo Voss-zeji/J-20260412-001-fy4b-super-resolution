@@ -52,6 +52,10 @@ class SRCNN(nn.Module):
 
         # 第三层: 重建 (reconstruction)
         self.conv3 = nn.Conv2d(n2, num_channels, kernel_size=f3, padding=f3//2)
+        # 初始化为零，使模型从 bicubic base 开始学习
+        nn.init.constant_(self.conv3.weight, 0)
+        if self.conv3.bias is not None:
+            nn.init.constant_(self.conv3.bias, 0)
 
     def forward(self, x):
         # 先进行双三次插值上采样
@@ -76,6 +80,7 @@ def train_epoch(model, train_loader, criterion, optimizer, device):
 
         optimizer.zero_grad()
         sr = model(lr)
+        sr = torch.clamp(sr, -1, 1)
         loss = criterion(sr, hr)
         loss.backward()
         optimizer.step()

@@ -111,6 +111,11 @@ class LatentDecoder(nn.Module):
             nn.Conv2d(64, out_channels, 3, padding=1)
         )
 
+        # 最后一层输出小残差，初始化为零
+        nn.init.constant_(self.decoder[-1].weight, 0)
+        if self.decoder[-1].bias is not None:
+            nn.init.constant_(self.decoder[-1].bias, 0)
+
     def forward(self, z):
         return self.decoder(z)
 
@@ -197,8 +202,11 @@ class LCMSR(nn.Module):
         self._initialize_weights()
 
     def _initialize_weights(self):
-        for m in self.modules():
+        for name, m in self.named_modules():
             if isinstance(m, nn.Conv2d):
+                if name == 'decoder.decoder.21':
+                    # 保留 LatentDecoder 中的零初始化
+                    continue
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
@@ -256,6 +264,7 @@ def train_epoch(model, train_loader, criterion, optimizer, device, grad_clip=1.0
         if sr.shape != hr.shape:
             sr = F.interpolate(sr, size=hr.shape[2:], mode='bicubic', align_corners=False)
 
+        sr = torch.clamp(sr, -1, 1)
         loss = criterion(sr, hr)
         loss.backward()
 

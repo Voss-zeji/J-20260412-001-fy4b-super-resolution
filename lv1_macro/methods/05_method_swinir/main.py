@@ -278,17 +278,25 @@ class SwinIR(nn.Module):
         self._initialize_weights()
 
     def _initialize_weights(self):
-        for m in self.modules():
+        for name, m in self.named_modules():
             if isinstance(m, nn.Linear):
                 nn.init.trunc_normal_(m.weight, std=0.02)
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if name == 'conv_last':
+                    # 最后一层输出小残差，使用接近零的初始化
+                    nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                    nn.init.constant_(m.weight, 0)
+                else:
+                    nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
     def forward(self, x):
+        # 保存原始输入用于全局残差连接
+        x_input = x
+
         # 浅层特征提取
         x_first = self.conv_first(x)
         res = x_first
@@ -312,8 +320,8 @@ class SwinIR(nn.Module):
         # 重建
         x = self.conv_last(x)
 
-        # 全局残差连接
-        base = F.interpolate(x_first, scale_factor=self.upscale_factor, mode='bilinear', align_corners=False)
+        # 全局残差连接（基于原始输入，而非特征）
+        base = F.interpolate(x_input, scale_factor=self.upscale_factor, mode='bilinear', align_corners=False)
         return x + base
 
 
@@ -329,6 +337,7 @@ def train_epoch(model, train_loader, criterion, optimizer, device, grad_clip=1.0
 
         optimizer.zero_grad()
         sr = model(lr)
+        sr = torch.clamp(sr, -1, 1)
         loss = criterion(sr, hr)
         loss.backward()
 

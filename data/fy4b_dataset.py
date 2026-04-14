@@ -46,7 +46,8 @@ class FY4BDataset(Dataset):
         channel='Channel07',
         patch_size=64,
         upscale_factor=2,
-        mode='train'
+        mode='train',
+        max_samples=None
     ):
         self.low_res_dir = low_res_dir
         self.high_res_dir = high_res_dir
@@ -56,17 +57,26 @@ class FY4BDataset(Dataset):
         self.patch_size = patch_size
         self.upscale_factor = upscale_factor
         self.mode = mode
-        
+        self.max_samples = max_samples
+
         # 验证通道
         if channel not in self.SUPPORTED_CHANNELS:
             raise ValueError(f"不支持的通道: {channel}，支持的通道: {self.SUPPORTED_CHANNELS}")
-        
+
         # 数据对列表
         self.data_pairs = []
-        
+
         # 扫描数据对
         self._scan_data_pairs()
-        
+
+        # 限制样本数量以加速训练
+        if self.max_samples is not None and len(self.data_pairs) > self.max_samples:
+            # 使用确定性随机种子确保 train/val 划分不同但可复现
+            rng = np.random.RandomState(42 if mode == 'train' else 43)
+            indices = rng.choice(len(self.data_pairs), self.max_samples, replace=False)
+            self.data_pairs = [self.data_pairs[i] for i in indices]
+            print(f"[{mode}] 限制使用 {len(self.data_pairs)} 个数据对")
+
         print(f"[{mode}] 找到 {len(self.data_pairs)} 个数据对")
         print(f"使用通道: {self.channel}")
     
@@ -322,11 +332,12 @@ def create_dataloaders(
     num_workers=4,
     patch_size=64,
     upscale_factor=2,
-    channel='Channel07'
+    channel='Channel07',
+    max_samples=100
 ):
     """
     创建训练和验证数据加载器
-    
+
     参数:
         low_res_dir: 低分辨率数据目录 (如 /root/autodl-tmp/FY-4B/calibration/4000M/CH07)
         high_res_dir: 高分辨率数据目录 (如 /root/autodl-tmp/FY-4B/calibration/2000M/CH07)
@@ -337,11 +348,12 @@ def create_dataloaders(
         patch_size: 图像块大小 (低分辨率空间)
         upscale_factor: 上采样因子
         channel: 使用的通道名称 (Channel07 或 Channel08)
-    
+        max_samples: 每个数据集最大使用的数据对数量，默认100。用于快速方法比较。
+
     返回:
         train_loader, val_loader
     """
-    
+
     # 训练数据集
     train_dataset = FY4BDataset(
         low_res_dir=low_res_dir,
@@ -351,9 +363,10 @@ def create_dataloaders(
         channel=channel,
         patch_size=patch_size,
         upscale_factor=upscale_factor,
-        mode='train'
+        mode='train',
+        max_samples=max_samples
     )
-    
+
     # 验证数据集 (使用不同的数据或分割)
     val_dataset = FY4BDataset(
         low_res_dir=low_res_dir,
@@ -363,9 +376,10 @@ def create_dataloaders(
         channel=channel,
         patch_size=patch_size,
         upscale_factor=upscale_factor,
-        mode='val'
+        mode='val',
+        max_samples=max_samples
     )
-    
+
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
@@ -374,7 +388,7 @@ def create_dataloaders(
         pin_memory=True,
         drop_last=True
     )
-    
+
     val_loader = DataLoader(
         val_dataset,
         batch_size=batch_size,
@@ -382,7 +396,7 @@ def create_dataloaders(
         num_workers=num_workers,
         pin_memory=True
     )
-    
+
     return train_loader, val_loader
 
 

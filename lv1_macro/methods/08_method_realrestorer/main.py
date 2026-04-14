@@ -98,6 +98,12 @@ class ConditionedResBlock(nn.Module):
             nn.Linear(channels, channels)
         )
 
+        # 初始化最后一层为零，确保训练初期 FiLM 不改变特征
+        nn.init.zeros_(self.cond_scale[-1].weight)
+        nn.init.zeros_(self.cond_scale[-1].bias)
+        nn.init.zeros_(self.cond_shift[-1].weight)
+        nn.init.zeros_(self.cond_shift[-1].bias)
+
         # 实例归一化（对真实图像更稳定）
         self.norm1 = nn.InstanceNorm2d(channels, affine=False)
         self.norm2 = nn.InstanceNorm2d(channels, affine=False)
@@ -186,9 +192,13 @@ class RealRestorer(nn.Module):
         self._initialize_weights()
 
     def _initialize_weights(self):
-        for m in self.modules():
+        for name, m in self.named_modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if name == 'reconstruction.2':
+                    # 最后一层输出小残差，初始化为零
+                    nn.init.constant_(m.weight, 0)
+                else:
+                    nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
@@ -238,6 +248,7 @@ def train_epoch(model, train_loader, criterion, optimizer, device, grad_clip=1.0
 
         optimizer.zero_grad()
         sr = model(lr)
+        sr = torch.clamp(sr, -1, 1)
         loss = criterion(sr, hr)
         loss.backward()
 

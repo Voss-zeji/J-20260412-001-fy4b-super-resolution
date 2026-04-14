@@ -98,9 +98,13 @@ class EDSR(nn.Module):
         self._initialize_weights()
 
     def _initialize_weights(self):
-        for m in self.modules():
+        for name, m in self.named_modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if name == 'tail':
+                    # 最后一层输出小残差，初始化为零
+                    nn.init.constant_(m.weight, 0)
+                else:
+                    nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
 
@@ -136,6 +140,7 @@ def train_epoch(model, train_loader, criterion, optimizer, device, grad_clip=1.0
 
         optimizer.zero_grad()
         sr = model(lr)
+        sr = torch.clamp(sr, -1, 1)
         loss = criterion(sr, hr)
         loss.backward()
 

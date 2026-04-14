@@ -108,14 +108,14 @@ class SelectiveScan(nn.Module):
         # 离散化
         delta = F.softplus(delta)
         delta_A = torch.exp(torch.einsum('bld,dn->bldn', delta, A))
-        delta_B = torch.einsum('bld,bldn->bldn', delta, B.unsqueeze(-1).expand(-1, -1, self.d_state))
+        delta_B = torch.einsum('bld,bln->bldn', delta, B)
 
         # 扫描
         h = torch.zeros(batch, dim, self.d_state, device=x.device, dtype=x.dtype)
         ys = []
         for t in range(seq_len):
-            h = delta_A[:, t] * h + delta_B[:, t] * x[:, t:t+1, :].transpose(-1, -2)
-            y = torch.einsum('bdn,bdn->bd', h, C[:, t])
+            h = delta_A[:, t] * h + delta_B[:, t] * x[:, t, :].unsqueeze(-1)
+            y = torch.einsum('bdn,bn->bd', h, C[:, t])
             ys.append(y)
         y = torch.stack(ys, dim=1)
 
@@ -204,13 +204,17 @@ class M2IR(nn.Module):
         self._initialize_weights()
 
     def _initialize_weights(self):
-        for m in self.modules():
+        for name, m in self.named_modules():
             if isinstance(m, nn.Linear):
                 nn.init.trunc_normal_(m.weight, std=0.02)
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                if name == 'reconstruction':
+                    # 最后一层输出小残差，初始化为零
+                    nn.init.constant_(m.weight, 0)
+                else:
+                    nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
 
     def forward(self, x):
         B, C, H, W = x.shape
@@ -262,6 +266,7 @@ def train_epoch(model, train_loader, criterion, optimizer, device, grad_clip=1.0
         if sr.shape != hr.shape:
             sr = F.interpolate(sr, size=hr.shape[2:], mode='bicubic', align_corners=False)
 
+        sr = torch.clamp(sr, -1, 1)
         loss = criterion(sr, hr)
         loss.backward()
 
