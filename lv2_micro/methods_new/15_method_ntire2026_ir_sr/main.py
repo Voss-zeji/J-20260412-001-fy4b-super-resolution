@@ -112,9 +112,6 @@ class NTIRE2026Net(nn.Module):
         self.upsample = nn.Sequential(
             nn.Conv2d(base_channels, base_channels * 4, 3, 1, 1),
             nn.PixelShuffle(2),
-            nn.PReLU(base_channels),
-            nn.Conv2d(base_channels, base_channels * 4, 3, 1, 1),
-            nn.PixelShuffle(2),
             nn.PReLU(base_channels)
         )
 
@@ -129,16 +126,17 @@ class NTIRE2026Net(nn.Module):
         fused = self.global_fusion(torch.cat([ms_feat, res_feat], dim=1))
         upsampled = self.upsample(fused)
         out = self.reconstruct(upsampled)
-        bicubic = F.interpolate(x, scale_factor=2, mode='bicubic', align_corners=False)
+        # bicubic上采样到目标尺寸
+        bicubic = F.interpolate(x, size=(out.shape[2], out.shape[3]), mode='bicubic', align_corners=False)
         return out + bicubic
 
 
 def train_epoch(model, dataloader, optimizer, device):
     model.train()
     total_loss = 0
-    for batch in dataloader:
-        lr = batch['lr'].to(device)
-        hr = batch['hr'].to(device)
+    for lr, hr, _ in dataloader:
+        lr = lr.to(device)
+        hr = hr.to(device)
         optimizer.zero_grad()
         sr = model(lr)
         loss = F.l1_loss(sr, hr)
@@ -152,13 +150,13 @@ def validate(model, dataloader, device):
     model.eval()
     total_psnr, total_ssim, count = 0, 0, 0
     with torch.no_grad():
-        for batch in dataloader:
-            lr = batch['lr'].to(device)
-            hr = batch['hr'].to(device)
+        for lr, hr, _ in dataloader:
+            lr = lr.to(device)
+            hr = hr.to(device)
             sr = torch.clamp(model(lr), -1, 1)
             for i in range(sr.size(0)):
-                total_psnr += calculate_psnr(sr[i], hr[i], data_range=2.0)
-                total_ssim += calculate_ssim(sr[i], hr[i], data_range=2.0)
+                total_psnr += calculate_psnr(sr[i:i+1], hr[i:i+1])
+                total_ssim += calculate_ssim(sr[i:i+1], hr[i:i+1])
                 count += 1
     return total_psnr / count, total_ssim / count
 
@@ -172,9 +170,10 @@ def main():
     model = NTIRE2026Net(in_channels=1, out_channels=1, base_channels=64, num_res_blocks=8)
     model = model.to(device)
 
-    channel = 'Channel07' if args.band == 'CH07' else 'Channel08'
-    low_res_dir = f"/root/autodl-tmp/Calibration-FY4B/4000M/{args.band}"
-    high_res_dir = f"/root/autodl-tmp/Calibration-FY4B/2000M/{args.band}"
+    low_res_dir = "/root/autodl-tmp/Calibration-FY4B/4000M/" + args.band
+    high_res_dir = "/root/autodl-tmp/Calibration-FY4B/2000M/" + args.band
+    channel = args.band.replace('CH', 'Channel')
+
     train_loader, val_loader = create_dataloaders(
         low_res_dir=low_res_dir, high_res_dir=high_res_dir, channel=channel,
         batch_size=args.batch_size, num_workers=4, patch_size=64, upscale_factor=2

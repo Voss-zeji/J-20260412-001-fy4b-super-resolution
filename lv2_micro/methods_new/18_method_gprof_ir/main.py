@@ -107,9 +107,9 @@ class GPROFIRNet(nn.Module):
 def train_epoch(model, dataloader, optimizer, device):
     model.train()
     total_loss = 0
-    for batch in dataloader:
-        lr = batch['lr'].to(device)
-        hr = batch['hr'].to(device)
+    for lr, hr, _ in dataloader:
+        lr = lr.to(device)
+        hr = hr.to(device)
         optimizer.zero_grad()
         sr = model(lr)
         loss = F.l1_loss(sr, hr)
@@ -123,12 +123,12 @@ def validate(model, dataloader, device):
     model.eval()
     total_psnr, total_ssim, count = 0, 0, 0
     with torch.no_grad():
-        for batch in dataloader:
+        for lr, hr, _ in dataloader:
             lr, hr = batch['lr'].to(device), batch['hr'].to(device)
             sr = torch.clamp(model(lr), -1, 1)
             for i in range(sr.size(0)):
-                total_psnr += calculate_psnr(sr[i], hr[i], data_range=2.0)
-                total_ssim += calculate_ssim(sr[i], hr[i], data_range=2.0)
+                total_psnr += calculate_psnr(sr[i:i+1], hr[i:i+1])
+                total_ssim += calculate_ssim(sr[i:i+1], hr[i:i+1])
                 count += 1
     return total_psnr / count, total_ssim / count
 

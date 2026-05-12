@@ -180,9 +180,9 @@ class ResBlock(nn.Module):
 def train_epoch(model, dataloader, optimizer, criterion, device):
     model.train()
     total_loss = 0
-    for batch in dataloader:
-        lr = batch['lr'].to(device)
-        hr = batch['hr'].to(device)
+    for lr, hr, _ in dataloader:
+        lr = lr.to(device)
+        hr = hr.to(device)
 
         optimizer.zero_grad()
         sr = model(lr)
@@ -202,16 +202,16 @@ def validate(model, dataloader, device):
     count = 0
 
     with torch.no_grad():
-        for batch in dataloader:
-            lr = batch['lr'].to(device)
-            hr = batch['hr'].to(device)
+        for lr, hr, _ in dataloader:
+            lr = lr.to(device)
+            hr = hr.to(device)
 
             sr = model(lr)
             sr = torch.clamp(sr, -1, 1)
 
             for i in range(sr.size(0)):
-                psnr = calculate_psnr(sr[i], hr[i], data_range=2.0)
-                ssim = calculate_ssim(sr[i], hr[i], data_range=2.0)
+                psnr = calculate_psnr(sr[i:i+1], hr[i:i+1])
+                ssim = calculate_ssim(sr[i:i+1], hr[i:i+1])
                 total_psnr += psnr
                 total_ssim += ssim
                 count += 1
