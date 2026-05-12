@@ -123,12 +123,15 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = InfoGeoNet().to(device)
-    train_loader, val_loader = create_dataloaders(args.band, 64, args.batch_size, 2)
+    train_loader, val_loader = create_dataloaders(
+        low_res_dir=low_res_dir, high_res_dir=high_res_dir, channel=channel,
+        batch_size=args.batch_size, num_workers=4, patch_size=64, upscale_factor=2
+    ), 64, args.batch_size, 2)
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
 
-    best_psnr, results = 0, {"method": "29_method_infogeo", "band": args.band}
+    best_psnr, results = 0, {"method": "29_method_infogeo", "band": ('Channel07' if args.band == 'CH07' else 'Channel08')}
 
     for epoch in range(1, args.epochs + 1):
         train_loss = train_epoch(model, train_loader, optimizer, device)

@@ -9,6 +9,7 @@ import json
 import time
 import sys
 import os
+import argparse
 from datetime import datetime
 from pathlib import Path
 
@@ -17,7 +18,23 @@ METHODS_DIR = Path(__file__).parent / "methods"
 RESULTS_DIR = Path(__file__).parent / "results"
 MAX_STEPS_PER_EPOCH = 1000  # 每个epoch最多1000步（实际由数据量决定）
 MAX_EPOCHS = 50  # 最多50个epoch
-BAND = "CH07"
+
+# 解析命令行参数
+parser = argparse.ArgumentParser(description='Run all methods for FY4B super-resolution')
+parser.add_argument('--band', type=str, default='CH07', choices=['CH07', 'CH08'],
+                    help='Band to process (CH07 or CH08)')
+parser.add_argument('--max-epochs', type=int, default=50,
+                    help='Maximum epochs per method')
+parser.add_argument('--timeout', type=int, default=45,
+                    help='Timeout in minutes per method')
+args = parser.parse_args()
+
+BAND = args.band
+MAX_EPOCHS = args.max_epochs
+TIMEOUT_MINUTES = args.timeout
+
+# 远程GPU服务器使用 mamba2 环境
+PYTHON_BIN = os.environ.get("PYTHON_BIN", "/root/miniconda3/envs/mamba2/bin/python")
 
 # 方法列表（按顺序）
 METHODS = [
@@ -56,17 +73,19 @@ def run_method(method_name: str):
     print(f"开始运行: {method_name}")
     print(f"开始时间: {start_timestamp}")
     print(f"计划: 最多 {MAX_EPOCHS} epochs")
-    print(f"时间限制: 45 分钟")
+    print(f"时间限制: {TIMEOUT_MINUTES} 分钟")
+    print(f"波段: {BAND}")
     print(f"{'='*60}")
 
     # 设置环境变量
     env = os.environ.copy()
     env['PYTHONUNBUFFERED'] = '1'
 
-    # 构建命令 - 使用timeout限制总时间（45分钟）
+    # 构建命令 - 使用timeout限制总时间
+    timeout_seconds = TIMEOUT_MINUTES * 60
     cmd = [
-        'timeout', '2700',  # 45分钟总超时
-        sys.executable, '-u',  # 无缓冲
+        'timeout', str(timeout_seconds),  # 时间限制
+        PYTHON_BIN, '-u',  # 无缓冲
         str(main_py),
         '--band', BAND,
         '--epochs', str(MAX_EPOCHS),
@@ -165,8 +184,9 @@ def run_method(method_name: str):
 def main():
     print("="*60)
     print("FY4B Super Resolution - lv1_macro 批量运行 v2")
+    print(f"波段: {BAND}")
     print(f"每个方法: 最多 {MAX_EPOCHS} epochs")
-    print(f"总时间限制: 45分钟/方法")
+    print(f"总时间限制: {TIMEOUT_MINUTES}分钟/方法")
     print("="*60)
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)

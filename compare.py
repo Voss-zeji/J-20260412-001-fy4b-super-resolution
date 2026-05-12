@@ -9,8 +9,12 @@ import argparse
 import json
 import subprocess
 import sys
+import os
 from pathlib import Path
 import pandas as pd
+
+# 远程GPU服务器使用 mamba2 环境
+PYTHON_BIN = os.environ.get("PYTHON_BIN", "/root/miniconda3/envs/mamba2/bin/python")
 
 
 def run_method(method_dir, band, epochs, output_file):
@@ -26,7 +30,7 @@ def run_method(method_dir, band, epochs, output_file):
     print(f"{'='*60}")
 
     cmd = [
-        sys.executable, str(main_py),
+        PYTHON_BIN, str(main_py),
         "--band", band,
         "--epochs", str(epochs),
         "--output", str(output_file)

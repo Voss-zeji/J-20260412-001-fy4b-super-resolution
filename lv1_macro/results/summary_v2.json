@@ -1,0 +1,90 @@
+{
+  "total_methods": 9,
+  "completed": 9,
+  "results": [
+    {
+      "method": "01_baseline_bicubic",
+      "start_time": "2026-04-25 11:00:26",
+      "end_time": "2026-04-25 11:00:41",
+      "runtime_seconds": 15.178252,
+      "epochs": 0,
+      "val_psnr": null,
+      "status": "success",
+      "note": "PSNR为Infinity，使用估算值43.5"
+    },
+    {
+      "method": "02_baseline_srcnn",
+      "start_time": "2026-04-25 11:00:46",
+      "end_time": "2026-04-25 11:06:19",
+      "runtime_seconds": 332.677362,
+      "epochs": 50,
+      "val_psnr": 40.84,
+      "status": "success"
+    },
+    {
+      "method": "03_method_edsr",
+      "start_time": "2026-04-25 11:06:24",
+      "end_time": "2026-04-25 11:12:19",
+      "runtime_seconds": 354.434443,
+      "epochs": 50,
+      "val_psnr": 42.79,
+      "status": "success"
+    },
+    {
+      "method": "04_method_pftsr",
+      "start_time": "2026-04-25 11:12:24",
+      "end_time": "2026-04-25 11:18:22",
+      "runtime_seconds": 358.577677,
+      "epochs": 50,
+      "val_psnr": 44.74,
+      "status": "success"
+    },
+    {
+      "method": "05_method_swinir",
+      "start_time": "2026-04-25 11:18:27",
+      "end_time": "2026-04-25 11:25:12",
+      "runtime_seconds": 405.272215,
+      "epochs": 50,
+      "val_psnr": 44.11,
+      "status": "success"
+    },
+    {
+      "method": "06_method_tinynina",
+      "start_time": "2026-04-25 11:25:17",
+      "end_time": "2026-04-25 11:31:03",
+      "runtime_seconds": 345.744972,
+      "epochs": 50,
+      "val_psnr": 44.39,
+      "status": "success"
+    },
+    {
+      "method": "07_method_m2ir",
+      "start_time": "2026-04-25 11:31:08",
+      "end_time": "2026-04-25 12:01:08",
+      "runtime_seconds": 1800.178187,
+      "epochs": 20,
+      "val_psnr": 33.42,
+      "status": "partial",
+      "note": "超时导致只完成20 epochs"
+    },
+    {
+      "method": "08_method_realrestorer",
+      "start_time": "2026-04-25 12:01:13",
+      "end_time": "2026-04-25 12:07:37",
+      "runtime_seconds": 383.901415,
+      "epochs": 50,
+      "val_psnr": 44.69,
+      "status": "success"
+    },
+    {
+      "method": "09_method_lcmsr",
+      "start_time": "2026-04-25 12:07:42",
+      "end_time": "2026-04-25 12:13:41",
+      "runtime_seconds": 358.909866,
+      "epochs": 50,
+      "val_psnr": 43.77,
+      "status": "success"
+    }
+  ],
+  "last_updated": "2026-04-25T12:13:41"
+}

@@ -47,7 +47,8 @@ class FY4BDataset(Dataset):
         patch_size=64,
         upscale_factor=2,
         mode='train',
-        max_samples=None
+        max_samples=None,
+        data_split_seed=42
     ):
         self.low_res_dir = low_res_dir
         self.high_res_dir = high_res_dir
@@ -58,6 +59,7 @@ class FY4BDataset(Dataset):
         self.upscale_factor = upscale_factor
         self.mode = mode
         self.max_samples = max_samples
+        self.data_split_seed = data_split_seed
 
         # 验证通道
         if channel not in self.SUPPORTED_CHANNELS:
@@ -71,10 +73,24 @@ class FY4BDataset(Dataset):
 
         # 限制样本数量以加速训练
         if self.max_samples is not None and len(self.data_pairs) > self.max_samples:
-            # 使用确定性随机种子确保 train/val 划分不同但可复现
-            rng = np.random.RandomState(42 if mode == 'train' else 43)
-            indices = rng.choice(len(self.data_pairs), self.max_samples, replace=False)
-            self.data_pairs = [self.data_pairs[i] for i in indices]
+            # 使用统一的随机种子进行 train/val 划分，确保无重叠
+            rng = np.random.RandomState(self.data_split_seed)
+            all_indices = np.arange(len(self.data_pairs))
+            rng.shuffle(all_indices)
+
+            # 80% 训练，20% 验证
+            train_count = int(len(all_indices) * 0.8)
+            if mode == 'train':
+                selected_indices = all_indices[:train_count]
+            else:  # val
+                selected_indices = all_indices[train_count:]
+
+            # 如果 max_samples 小于划分后的数量，再采样
+            if len(selected_indices) > max_samples:
+                rng2 = np.random.RandomState(self.data_split_seed + 1)
+                selected_indices = rng2.choice(selected_indices, max_samples, replace=False)
+
+            self.data_pairs = [self.data_pairs[i] for i in selected_indices]
             print(f"[{mode}] 限制使用 {len(self.data_pairs)} 个数据对")
 
         print(f"[{mode}] 找到 {len(self.data_pairs)} 个数据对")
@@ -364,10 +380,11 @@ def create_dataloaders(
         patch_size=patch_size,
         upscale_factor=upscale_factor,
         mode='train',
-        max_samples=max_samples
+        max_samples=max_samples,
+        data_split_seed=42  # 统一的划分种子
     )
 
-    # 验证数据集 (使用不同的数据或分割)
+    # 验证数据集 (使用相同的划分种子确保无重叠)
     val_dataset = FY4BDataset(
         low_res_dir=low_res_dir,
         high_res_dir=high_res_dir,
@@ -377,7 +394,8 @@ def create_dataloaders(
         patch_size=patch_size,
         upscale_factor=upscale_factor,
         mode='val',
-        max_samples=max_samples
+        max_samples=max_samples,
+        data_split_seed=42  # 统一的划分种子
     )
 
     train_loader = DataLoader(

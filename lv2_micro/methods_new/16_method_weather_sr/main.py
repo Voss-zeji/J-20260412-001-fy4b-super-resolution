@@ -231,7 +231,9 @@ def main():
 
     # 加载数据
     train_loader, val_loader = create_dataloaders(
-        band=args.band,
+        low_res_dir=low_res_dir, high_res_dir=high_res_dir, channel=channel,
+        batch_size=args.batch_size, num_workers=4, patch_size=64, upscale_factor=2
+    ),
         patch_size=64,
         batch_size=args.batch_size,
         upscale_factor=2
@@ -247,7 +249,7 @@ def main():
     best_psnr = 0
     results = {
         "method": "16_method_weather_sr",
-        "band": args.band,
+        "band": ('Channel07' if args.band == 'CH07' else 'Channel08'),
         "epochs": 0,
         "best_psnr": 0,
         "best_ssim": 0,

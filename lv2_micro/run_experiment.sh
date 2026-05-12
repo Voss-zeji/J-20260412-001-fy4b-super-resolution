@@ -32,7 +32,7 @@ fi
 
 # 运行实验
 echo -e "\n[1/3] Running experiment..."
-python experiments/$EXPERIMENT_NAME/main.py \
+/root/miniconda3/envs/mamba2/bin/python experiments/$EXPERIMENT_NAME/main.py \
   --band $BAND \
   --output experiments/$EXPERIMENT_NAME/result.json \
   2>&1 | tee experiments/$EXPERIMENT_NAME/run.log

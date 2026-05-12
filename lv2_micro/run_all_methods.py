@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-批量运行 lv2_micro 下所有融合方法，做快速收敛性测试
+lv2_micro 批量运行 5 种融合方法
+参考 lv1_macro/run_all_methods_v2.py 的设计
 """
 
 import subprocess
@@ -8,16 +9,20 @@ import json
 import time
 import sys
 import os
+import argparse
+import shutil
 from datetime import datetime
 from pathlib import Path
 
 # 配置
 METHODS_DIR = Path(__file__).parent / "methods"
-RESULTS_DIR = Path(__file__).parent / "results"
-MAX_EPOCHS = 10  # 快速测试：10 epochs
-TIMEOUT_SECONDS = 900  # 15分钟总超时
-BAND = "CH07"
+EXPERIMENTS_DIR = Path(__file__).parent / "experiments"
+MAX_EPOCHS = 50
+TIMEOUT_MINUTES = 45  # lv2 方法更复杂，多给 15 分钟
 
+PYTHON_BIN = "/root/miniconda3/envs/mamba2/bin/python"
+
+# 5 种融合方法
 METHODS = [
     "10_method_swinrestorer",
     "11_method_edgepft",
@@ -26,25 +31,7 @@ METHODS = [
     "14_method_dualscalerestore",
 ]
 
-FEISHU_WEBHOOK = os.environ.get("FEISHU_WEBHOOK_URL", "")
-
-
-def send_feishu(action, method_name, extra=""):
-    """发送飞书通知"""
-    project_root = Path(__file__).parent.parent
-    feishu_script = project_root / "send_feishu.py"
-    if feishu_script.exists():
-        try:
-            subprocess.run(
-                [sys.executable, str(feishu_script), action, method_name, extra, ""],
-                capture_output=True,
-                timeout=10,
-            )
-        except Exception:
-            pass
-
-
-def run_method(method_name: str):
+def run_method(method_name: str, band: str = "CH07"):
     """运行单个方法"""
     method_dir = METHODS_DIR / method_name
     main_py = method_dir / "main.py"
@@ -53,32 +40,44 @@ def run_method(method_name: str):
         print(f"[错误] {method_name}/main.py 不存在，跳过")
         return None
 
-    method_result_dir = RESULTS_DIR / method_name
-    method_result_dir.mkdir(parents=True, exist_ok=True)
+    # 创建实验目录
+    exp_name = f"{method_name}_{band}"
+    exp_dir = EXPERIMENTS_DIR / exp_name
 
-    output_file = method_result_dir / "result.json"
-    log_file = method_result_dir / "training.log"
+    # 如果已存在则删除
+    if exp_dir.exists():
+        shutil.rmtree(exp_dir)
 
+    # 复制方法代码到实验目录
+    shutil.copytree(method_dir, exp_dir)
+    exp_main_py = exp_dir / "main.py"
+
+    output_file = exp_dir / "result.json"
+    log_file = exp_dir / "training.log"
+
+    # 记录开始时间
     start_time = datetime.now()
     start_timestamp = start_time.strftime("%Y-%m-%d %H:%M:%S")
 
     print(f"\n{'='*60}")
     print(f"开始运行: {method_name}")
+    print(f"实验目录: {exp_name}")
     print(f"开始时间: {start_timestamp}")
     print(f"计划: 最多 {MAX_EPOCHS} epochs")
-    print(f"时间限制: {TIMEOUT_SECONDS//60} 分钟")
+    print(f"时间限制: {TIMEOUT_MINUTES} 分钟")
+    print(f"波段: {band}")
     print(f"{'='*60}")
 
-    send_feishu("开始", method_name, f"lv2快速测试 {MAX_EPOCHS}epochs")
-
+    # 设置环境变量
     env = os.environ.copy()
     env['PYTHONUNBUFFERED'] = '1'
 
+    timeout_seconds = TIMEOUT_MINUTES * 60
     cmd = [
-        'timeout', str(TIMEOUT_SECONDS),
-        sys.executable, '-u',
-        str(main_py),
-        '--band', BAND,
+        'timeout', str(timeout_seconds),
+        PYTHON_BIN, '-u',
+        str(exp_main_py),
+        '--band', band,
         '--epochs', str(MAX_EPOCHS),
         '--batch-size', '8',
         '--output', str(output_file),
@@ -113,7 +112,7 @@ def run_method(method_name: str):
                     m = re.search(r'Epoch\s*\[(\d+)/(\d+)\]', line)
                     if m:
                         last_epoch = int(m.group(1))
-                    m = re.search(r'val_psnr:\s*([\d.]+)', line, re.I)
+                    m = re.search(r'PSNR[:\s]+([\d.]+)', line, re.I)
                     if m:
                         last_psnr = float(m.group(1))
 
@@ -127,13 +126,14 @@ def run_method(method_name: str):
 
     except Exception as e:
         print(f"[错误] 运行 {method_name} 时出错: {e}")
-        send_feishu("异常", method_name, str(e))
         return None
 
+    # 记录结束时间
     end_time = datetime.now()
     end_timestamp = end_time.strftime("%Y-%m-%d %H:%M:%S")
     actual_runtime = (end_time - start_time).total_seconds()
 
+    # 读取结果
     result_data = {}
     if output_file.exists():
         try:
@@ -145,7 +145,7 @@ def run_method(method_name: str):
     if not result_data:
         result_data = {
             "method": method_name,
-            "band": BAND,
+            "band": band,
             "status": "partial",
             "train_epochs": last_epoch,
             "val_psnr": last_psnr if last_psnr > 0 else None,
@@ -163,24 +163,37 @@ def run_method(method_name: str):
     print(f"运行epoch: {result_data.get('train_epochs', 'N/A')}")
     print(f"截至精度: {result_data.get('val_psnr', 'N/A')}")
 
-    send_feishu("完成", method_name, f"PSNR={result_data.get('val_psnr', 'N/A')} epochs={result_data.get('train_epochs', 'N/A')}")
-
     return result_data
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Run lv2_micro methods')
+    parser.add_argument('--band', type=str, default='CH07', choices=['CH07', 'CH08'])
+    parser.add_argument('--max-epochs', type=int, default=50)
+    parser.add_argument('--timeout', type=int, default=45)
+    args = parser.parse_args()
+
+    global MAX_EPOCHS, TIMEOUT_MINUTES
+    MAX_EPOCHS = args.max_epochs
+    TIMEOUT_MINUTES = args.timeout
+
+    BAND = args.band
+
     print("="*60)
-    print("FY4B Super Resolution - lv2_micro 融合方法快速测试")
+    print("FY4B Super Resolution - lv2_micro 批量运行")
+    print(f"波段: {BAND}")
     print(f"每个方法: 最多 {MAX_EPOCHS} epochs")
-    print(f"总时间限制: {TIMEOUT_SECONDS//60}分钟/方法")
+    print(f"总时间限制: {TIMEOUT_MINUTES}分钟/方法")
     print("="*60)
 
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    EXPERIMENTS_DIR.mkdir(parents=True, exist_ok=True)
+
     all_results = []
 
     for i, method in enumerate(METHODS, 1):
         print(f"\n[{i}/{len(METHODS)}] 准备运行 {method}...")
-        result = run_method(method)
+
+        result = run_method(method, BAND)
 
         if result:
             all_results.append({
@@ -193,30 +206,31 @@ def main():
                 "status": result.get("status"),
             })
 
-        summary_file = RESULTS_DIR / "summary_lv2_quick.json"
-        with open(summary_file, "w") as f:
-            json.dump({
-                "total_methods": len(METHODS),
-                "completed": len(all_results),
-                "results": all_results,
-            }, f, indent=2)
+        print(f"\n[休息] 10秒后继续...")
+        time.sleep(10)
 
-        if i < len(METHODS):
-            print(f"\n[休息] 5秒后继续...")
-            time.sleep(5)
-
+    # 最终汇总
     print("\n" + "="*60)
     print("所有方法运行完成!")
     print("="*60)
     print(f"\n{'方法':<30} {'时间':<10} {'Epochs':<8} {'PSNR':<10}")
-    print("-"*58)
+    print("-"*60)
     for r in all_results:
         runtime = f"{r['runtime_seconds']/60:.1f}m" if r.get('runtime_seconds') else 'N/A'
         epochs = str(r.get('epochs', 'N/A'))
         psnr = f"{r['val_psnr']:.2f}" if r.get('val_psnr') else 'N/A'
         print(f"{r['method']:<30} {runtime:<10} {epochs:<8} {psnr:<10}")
 
-    print(f"\n汇总文件: {RESULTS_DIR / 'summary_lv2_quick.json'}")
+    # 保存汇总
+    summary_file = EXPERIMENTS_DIR / "summary.json"
+    with open(summary_file, "w") as f:
+        json.dump({
+            "total_methods": len(METHODS),
+            "completed": len(all_results),
+            "results": all_results,
+        }, f, indent=2)
+
+    print(f"\n汇总文件: {summary_file}")
 
 
 if __name__ == "__main__":

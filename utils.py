@@ -566,3 +566,183 @@ def calculate_channel_metrics(pred: torch.Tensor, target: torch.Tensor, channel_
         }
 
     return channel_metrics
+
+
+# ==================== FY-4B 校准工具 ====================
+
+def calibrate_fy4b_data(
+    raw_hdf_path: str,
+    output_dir: str,
+    resolution: str = "2000M",
+    channels: list = None
+):
+    """
+    将 FY-4B 原始数据校准为亮温数据
+
+    校准原理：
+    - 原始数据中 Data/NOMChannelXX 包含 DN 值 (uint16)
+    - 校准查找表 Calibration/CALChannelXX 包含 DN->亮温映射 (4096个值)
+    - 直接查表即可得到亮温 (单位: K)
+
+    Args:
+        raw_hdf_path: 原始 HDF 文件路径
+                     如: /path/to/FY4B-_AGRI--_N_DISK_..._2000M_V0001.HDF
+        output_dir: 输出目录
+        resolution: 分辨率，"2000M" 或 "4000M"
+        channels: 要处理的通道列表，如 ["CH07", "CH08"]，None 表示处理所有
+
+    Returns:
+        输出文件路径列表
+
+    Example:
+        >>> calibrate_fy4b_data(
+        ...     raw_hdf_path="/root/autodl-tmp/FY-4B/Raw-data/20250301-DISK-2000M/FY4B...HDF",
+        ...     output_dir="/root/autodl-tmp/Calibration-FY4B/2000M/CH07",
+        ...     resolution="2000M",
+        ...     channels=["CH07"]
+        ... )
+    """
+    import h5py
+    import os
+    import re
+
+    if channels is None:
+        channels = ["CH07", "CH08"]
+
+    # 通道名映射 (NOMChannelXX -> CHXX)
+    channel_map = {
+        "CH07": "NOMChannel07",
+        "CH08": "NOMChannel08",
+    }
+
+    # 创建输出目录
+    os.makedirs(output_dir, exist_ok=True)
+
+    # 从文件名提取时间戳
+    filename = os.path.basename(raw_hdf_path)
+    time_match = re.search(r'(\d{14})', filename)
+    if time_match:
+        timestamp = time_match.group(1)
+    else:
+        raise ValueError(f"无法从文件名提取时间戳: {filename}")
+
+    # 输出文件名
+    output_filename = f"FY4B_{channels[0].replace('CH', 'CH')}_CAL_{timestamp}.HDF"
+    if len(channels) == 1:
+        # 单通道输出
+        output_path = os.path.join(output_dir, output_filename)
+    else:
+        # 多通道输出到同一文件
+        output_path = os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, f"FY4B_CAL_{timestamp}.HDF")
+
+    # 读取原始数据并校准
+    calibrated_data = {}
+
+    with h5py.File(raw_hdf_path, 'r') as h5:
+        for ch in channels:
+            nom_key = channel_map.get(ch)
+            cal_key = f"Calibration/CAL{ch.replace('CH', 'Channel')}"
+
+            # 读取 DN 值
+            nom_data = h5[f"Data/{nom_key}"][:]
+
+            # 读取查找表
+            cal_table = h5[cal_key][:]
+
+            # 查表转换 (处理无效值 65535)
+            calibrated = np.zeros_like(nom_data, dtype=np.float32)
+            valid_mask = (nom_data != 65535) & (nom_data != 0) & (nom_data < 4096)
+
+            # 无效值设为 NaN
+            calibrated[~valid_mask] = np.nan
+
+            # 有效值查表
+            calibrated[valid_mask] = cal_table[nom_data[valid_mask]]
+
+            calibrated_data[ch] = calibrated
+            print(f"  {ch}: 有效像素 {valid_mask.sum()} / {valid_mask.size}")
+
+    # 保存校准后的数据
+    if len(channels) == 1:
+        # 单通道：每个通道一个文件
+        ch = channels[0]
+        output_filename = f"FY4B_{ch}_CAL_{timestamp}.HDF"
+        output_path = os.path.join(output_dir, output_filename)
+
+        with h5py.File(output_path, 'w') as h5:
+            h5.create_dataset(ch, data=calibrated_data[ch], compression="gzip")
+        print(f"  保存: {output_path}")
+    else:
+        # 多通道：所有通道一个文件
+        output_filename = f"FY4B_CAL_{timestamp}.HDF"
+        output_path = os.path.join(output_dir, output_filename)
+
+        with h5py.File(output_path, 'w') as h5:
+            for ch, data in calibrated_data.items():
+                h5.create_dataset(ch, data=data, compression="gzip")
+        print(f"  保存: {output_path}")
+
+    return output_path
+
+
+def batch_calibrate_fy4b(
+    raw_data_dir: str,
+    output_base_dir: str,
+    resolution: str = "2000M",
+    channels: list = None,
+    date_pattern: str = None
+):
+    """
+    批量校准 FY-4B 原始数据
+
+    Args:
+        raw_data_dir: 原始数据目录，如 /root/autodl-tmp/FY-4B/Raw-data/20250301-DISK-2000M
+        output_base_dir: 输出基础目录，如 /root/autodl-tmp/Calibration-FY4B
+        resolution: 分辨率，"2000M" 或 "4000M"
+        channels: 要处理的通道列表
+        date_pattern: 日期过滤模式，如 "20250301"
+
+    Returns:
+        处理的文件数量
+
+    Example:
+        >>> batch_calibrate_fy4b(
+        ...     raw_data_dir="/root/autodl-tmp/FY-4B/Raw-data/20250301-DISK-2000M",
+        ...     output_base_dir="/root/autodl-tmp/Calibration-FY4B",
+        ...     resolution="2000M",
+        ...     channels=["CH07", "CH08"]
+        ... )
+    """
+    import glob as glob_module
+
+    if channels is None:
+        channels = ["CH07", "CH08"]
+
+    # 查找所有原始 HDF 文件
+    hdf_files = sorted(glob_module.glob(os.path.join(raw_data_dir, "*.HDF")))
+    print(f"找到 {len(hdf_files)} 个原始文件")
+
+    # 创建每个通道的输出目录
+    output_dirs = {}
+    for ch in channels:
+        output_dirs[ch] = os.path.join(output_base_dir, resolution, ch)
+        os.makedirs(output_dirs[ch], exist_ok=True)
+
+    # 逐个处理
+    processed = 0
+    for hdf_path in hdf_files:
+        print(f"\n处理: {os.path.basename(hdf_path)}")
+
+        # 为每个通道单独处理
+        for ch in channels:
+            calibrate_fy4b_data(
+                raw_hdf_path=hdf_path,
+                output_dir=output_dirs[ch],
+                resolution=resolution,
+                channels=[ch]
+            )
+        processed += 1
+
+    print(f"\n完成! 共处理 {processed} 个文件")
+    return processed
