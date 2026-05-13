@@ -11,6 +11,7 @@ FY-4B卫星数据集类
 import os
 import re
 import glob
+import cv2
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -240,30 +241,55 @@ class FY4BDataset(Dataset):
             return np.random.randn(size, size).astype(np.float32) * 50 + 300
     
     def _crop_patch(self, lr_img, hr_img):
-        """随机裁剪图像块"""
-        h, w = lr_img.shape
-        
+        """随机裁剪图像块，确保输出尺寸固定"""
+        lr_h, lr_w = lr_img.shape
+        hr_h, hr_w = hr_img.shape
+        target_lr_h, target_lr_w = self.patch_size, self.patch_size
+        target_hr_h, target_hr_w = self.patch_size * self.upscale_factor, self.patch_size * self.upscale_factor
+
+        # 确保源图像足够大，如果不够则填充
+        if lr_h < target_lr_h or lr_w < target_lr_w:
+            pad_h = max(0, target_lr_h - lr_h)
+            pad_w = max(0, target_lr_w - lr_w)
+            lr_img = np.pad(lr_img, ((0, pad_h), (0, pad_w)), mode='edge')
+            lr_h, lr_w = lr_img.shape
+
+        if hr_h < target_hr_h or hr_w < target_hr_w:
+            pad_h = max(0, target_hr_h - hr_h)
+            pad_w = max(0, target_hr_w - hr_w)
+            hr_img = np.pad(hr_img, ((0, pad_h), (0, pad_w)), mode='edge')
+            hr_h, hr_w = hr_img.shape
+
         if self.mode == 'train':
             # 随机裁剪
-            h_start = np.random.randint(0, h - self.patch_size + 1)
-            w_start = np.random.randint(0, w - self.patch_size + 1)
+            h_start = np.random.randint(0, max(1, lr_h - target_lr_h + 1))
+            w_start = np.random.randint(0, max(1, lr_w - target_lr_w + 1))
         else:
             # 验证模式下从中心裁剪
-            h_start = (h - self.patch_size) // 2
-            w_start = (w - self.patch_size) // 2
-        
+            h_start = max(0, (lr_h - target_lr_h) // 2)
+            w_start = max(0, (lr_w - target_lr_w) // 2)
+
         # 低分辨率裁剪
-        lr_patch = lr_img[h_start:h_start+self.patch_size, 
-                         w_start:w_start+self.patch_size]
-        
+        lr_patch = lr_img[h_start:h_start+target_lr_h,
+                         w_start:w_start+target_lr_w]
+
         # 高分辨率对应区域 (upscale_factor倍)
         hr_h_start = h_start * self.upscale_factor
         hr_w_start = w_start * self.upscale_factor
-        hr_patch_size = self.patch_size * self.upscale_factor
-        hr_patch = hr_img[hr_h_start:hr_h_start+hr_patch_size,
-                         hr_w_start:hr_w_start+hr_patch_size]
-        
+        hr_patch = hr_img[hr_h_start:hr_h_start+target_hr_h,
+                         hr_w_start:hr_w_start+target_hr_w]
+
+        # 确保输出尺寸固定
+        if lr_patch.shape != (target_lr_h, target_lr_w):
+            lr_patch = self._resize_to_target(lr_patch, target_lr_h, target_lr_w)
+        if hr_patch.shape != (target_hr_h, target_hr_w):
+            hr_patch = self._resize_to_target(hr_patch, target_hr_h, target_hr_w)
+
         return lr_patch, hr_patch
+
+    def _resize_to_target(self, img, target_h, target_w):
+        """将图像resize到目标尺寸"""
+        return cv2.resize(img, (target_w, target_h), interpolation=cv2.INTER_LINEAR)
     
     def _augment(self, lr, hr):
         """数据增强"""

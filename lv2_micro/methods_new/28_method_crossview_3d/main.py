@@ -91,7 +91,8 @@ def train_epoch(model, dataloader, optimizer, device):
     model.train()
     total_loss = 0
     for lr, hr, _ in dataloader:
-        lr, hr = batch['lr'].to(device), batch['hr'].to(device)
+        lr = lr.to(device)
+        hr = hr.to(device)
         optimizer.zero_grad()
         sr = model(lr)
         loss = F.l1_loss(sr, hr)
@@ -106,7 +107,8 @@ def validate(model, dataloader, device):
     total_psnr, total_ssim, count = 0, 0, 0
     with torch.no_grad():
         for lr, hr, _ in dataloader:
-            lr, hr = batch['lr'].to(device), batch['hr'].to(device)
+            lr = lr.to(device)
+            hr = hr.to(device)
             sr = torch.clamp(model(lr), -1, 1)
             for i in range(sr.size(0)):
                 total_psnr += calculate_psnr(sr[i:i+1], hr[i:i+1])
@@ -120,15 +122,30 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = CrossView3DNet().to(device)
+
+    low_res_dir = "/root/autodl-tmp/FY-4B/calibration/4000M/" + args.band
+    high_res_dir = "/root/autodl-tmp/FY-4B/calibration/2000M/" + args.band
+    channel = args.band.replace('CH', 'Channel')
+
     train_loader, val_loader = create_dataloaders(
         low_res_dir=low_res_dir, high_res_dir=high_res_dir, channel=channel,
-        batch_size=args.batch_size, num_workers=4, patch_size=64, upscale_factor=2
-    ), 64, args.batch_size, 2)
+        batch_size=args.batch_size, num_workers=0, patch_size=64, upscale_factor=2,
+        max_samples=100
+    )
+
+    print(f"训练集: {len(train_loader.dataset)} 样本, 验证集: {len(val_loader.dataset)} 样本")
 
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
 
-    best_psnr, results = 0, {"method": "28_method_crossview_3d", "band": ('Channel07' if args.band == 'CH07' else 'Channel08')}
+    best_psnr = 0
+    results = {
+        "method": "28_method_crossview_3d",
+        "band": args.band,
+        "epochs": 0,
+        "best_psnr": 0,
+        "best_ssim": 0,
+    }
 
     for epoch in range(1, args.epochs + 1):
         train_loss = train_epoch(model, train_loader, optimizer, device)
@@ -142,7 +159,12 @@ def main():
             results["best_psnr"], results["best_ssim"] = best_psnr, val_ssim
             results["best_epoch"] = epoch
 
+        results["epochs"] = epoch
+
     results["status"] = "success"
+    results["final_psnr"] = val_psnr
+    results["final_ssim"] = val_ssim
+
     with open(args.output, 'w') as f:
         json.dump(results, f, indent=2)
     print(f"完成! 最佳 PSNR: {best_psnr:.2f}")

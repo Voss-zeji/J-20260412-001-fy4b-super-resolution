@@ -229,14 +229,15 @@ def main():
     model = WeatherSRNet(in_channels=1, out_channels=1, base_channels=64)
     model = model.to(device)
 
+    low_res_dir = "/root/autodl-tmp/FY-4B/calibration/4000M/" + args.band
+    high_res_dir = "/root/autodl-tmp/FY-4B/calibration/2000M/" + args.band
+    channel = args.band.replace('CH', 'Channel')
+
     # 加载数据
     train_loader, val_loader = create_dataloaders(
         low_res_dir=low_res_dir, high_res_dir=high_res_dir, channel=channel,
-        batch_size=args.batch_size, num_workers=4, patch_size=64, upscale_factor=2
-    ),
-        patch_size=64,
-        batch_size=args.batch_size,
-        upscale_factor=2
+        batch_size=args.batch_size, num_workers=0, patch_size=64, upscale_factor=2,
+        max_samples=100
     )
 
     print(f"训练集: {len(train_loader.dataset)} 样本, 验证集: {len(val_loader.dataset)} 样本")
@@ -249,7 +250,7 @@ def main():
     best_psnr = 0
     results = {
         "method": "16_method_weather_sr",
-        "band": ('Channel07' if args.band == 'CH07' else 'Channel08'),
+        "band": args.band,
         "epochs": 0,
         "best_psnr": 0,
         "best_ssim": 0,

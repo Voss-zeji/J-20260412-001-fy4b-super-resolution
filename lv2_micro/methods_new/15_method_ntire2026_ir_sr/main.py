@@ -170,13 +170,14 @@ def main():
     model = NTIRE2026Net(in_channels=1, out_channels=1, base_channels=64, num_res_blocks=8)
     model = model.to(device)
 
-    low_res_dir = "/root/autodl-tmp/Calibration-FY4B/4000M/" + args.band
-    high_res_dir = "/root/autodl-tmp/Calibration-FY4B/2000M/" + args.band
+    low_res_dir = "/root/autodl-tmp/FY-4B/calibration/4000M/" + args.band
+    high_res_dir = "/root/autodl-tmp/FY-4B/calibration/2000M/" + args.band
     channel = args.band.replace('CH', 'Channel')
 
     train_loader, val_loader = create_dataloaders(
         low_res_dir=low_res_dir, high_res_dir=high_res_dir, channel=channel,
-        batch_size=args.batch_size, num_workers=4, patch_size=64, upscale_factor=2
+        batch_size=args.batch_size, num_workers=0, patch_size=64, upscale_factor=2,
+        max_samples=100
     )
 
     print(f"训练集: {len(train_loader.dataset)} 样本, 验证集: {len(val_loader.dataset)} 样本")
