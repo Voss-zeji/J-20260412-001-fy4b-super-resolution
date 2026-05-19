@@ -65,9 +65,6 @@ class NormalizingTrajectoryNet(nn.Module):
         self.upsample = nn.Sequential(
             nn.Conv2d(base_channels, base_channels * 4, 3, 1, 1),
             nn.PixelShuffle(2),
-            nn.GELU(),
-            nn.Conv2d(base_channels, base_channels * 4, 3, 1, 1),
-            nn.PixelShuffle(2),
             nn.GELU()
         )
 
