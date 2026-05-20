@@ -48,14 +48,10 @@ def run_method(method_name: str, band: str = "CH07"):
         print(f"[错误] {method_name}/main.py 不存在，跳过")
         return None
 
-    # 创建实验目录
+    # 创建实验目录（仅存放结果）
     exp_name = f"{method_name}_{band}"
     exp_dir = EXPERIMENTS_DIR / exp_name
-
-    if exp_dir.exists():
-        shutil.rmtree(exp_dir)
-    shutil.copytree(method_dir, exp_dir)
-    exp_main_py = exp_dir / "main.py"
+    exp_dir.mkdir(parents=True, exist_ok=True)
 
     output_file = exp_dir / "result.json"
     log_file = exp_dir / "training.log"
@@ -78,7 +74,7 @@ def run_method(method_name: str, band: str = "CH07"):
     cmd = [
         'timeout', str(timeout_seconds),
         PYTHON_BIN, '-u',
-        str(exp_main_py),
+        str(main_py),
         '--band', band,
         '--epochs', str(MAX_EPOCHS),
         '--batch-size', '8',
