@@ -1,56 +1,87 @@
 #!/usr/bin/env python3
 """
-LV3 统一深度训练脚本
-8 个保留方法，200 epoch，CH07 通道
-每 50 epoch 保存 checkpoint 和指标快照
+LV3 统一深度训练脚本 v2
+全部 20 种方法（含 Bicubic 基线），200 epoch，CH07 通道
+无超时限制，每 50 epoch 记录快照，完整记录运行时间
 """
 
 import subprocess
 import json
 import os
 import re
-import shutil
 from datetime import datetime
 from pathlib import Path
 
 # ── 配置 ──────────────────────────────────────────────
 PROJECT_ROOT = Path(__file__).parent.parent
 LV3_DIR = Path(__file__).parent
-METHODS_DIR = LV3_DIR / "methods"
 RESULTS_DIR = LV3_DIR / "results"
 PYTHON_BIN = "/root/miniconda3/envs/mamba2/bin/python"
 
 MAX_EPOCHS = 200
 BATCH_SIZE = 8
 BAND = "CH07"
-CHECKPOINT_EVERY = 50  # 每 50 epoch 记录一次
+CHECKPOINT_EVERY = 50
 
-# 8 个保留方法：4 个来自 LV1，4 个来自 LV2
-# 源码位置映射
-METHOD_SOURCES = {
-    "04_method_pftsr": PROJECT_ROOT / "lv1_macro" / "methods" / "04_method_pftsr",
-    "05_method_swinir": PROJECT_ROOT / "lv1_macro" / "methods" / "05_method_swinir",
-    "06_method_tinynina": PROJECT_ROOT / "lv1_macro" / "methods" / "06_method_tinynina",
+# 全部 20 种方法的源码位置
+ALL_METHOD_SOURCES = {
+    # LV1 方法
+    "01_baseline_bicubic":    PROJECT_ROOT / "lv1_macro" / "methods" / "01_baseline_bicubic",
+    "02_baseline_srcnn":      PROJECT_ROOT / "lv1_macro" / "methods" / "02_baseline_srcnn",
+    "03_method_edsr":         PROJECT_ROOT / "lv1_macro" / "methods" / "03_method_edsr",
+    "04_method_pftsr":        PROJECT_ROOT / "lv1_macro" / "methods" / "04_method_pftsr",
+    "05_method_swinir":       PROJECT_ROOT / "lv1_macro" / "methods" / "05_method_swinir",
+    "06_method_tinynina":     PROJECT_ROOT / "lv1_macro" / "methods" / "06_method_tinynina",
+    "07_method_m2ir":         PROJECT_ROOT / "lv1_macro" / "methods" / "07_method_m2ir",
     "08_method_realrestorer": PROJECT_ROOT / "lv1_macro" / "methods" / "08_method_realrestorer",
-    "10_method_swinrestorer": PROJECT_ROOT / "lv2_micro" / "lv2-save" / "10_method_swinrestorer",
-    "11_method_edgepft": PROJECT_ROOT / "lv2_micro" / "lv2-save" / "11_method_edgepft",
-    "14_method_dualscalerestore": PROJECT_ROOT / "lv2_micro" / "lv2-save" / "14_method_dualscalerestore",
-    "17_method_emambair": PROJECT_ROOT / "lv2_micro" / "lv2-save" / "17_method_emambair",
+    "09_method_lcmsr":        PROJECT_ROOT / "lv1_macro" / "methods" / "09_method_lcmsr",
+    # LV2 融合方法
+    "10_method_swinrestorer":      PROJECT_ROOT / "lv2_micro" / "lv2-save" / "10_method_swinrestorer",
+    "11_method_edgepft":           PROJECT_ROOT / "lv2_micro" / "lv2-save" / "11_method_edgepft",
+    "12_method_latentswin":        PROJECT_ROOT / "lv2_micro" / "lv2-save" / "12_method_latentswin",
+    "13_method_mambapft":          PROJECT_ROOT / "lv2_micro" / "lv2-save" / "13_method_mambapft",
+    "14_method_dualscalerestore":  PROJECT_ROOT / "lv2_micro" / "lv2-save" / "14_method_dualscalerestore",
+    # LV2 论文方法
+    "15_method_ntire2026_ir_sr":   PROJECT_ROOT / "lv2_micro" / "lv2-save" / "15_method_ntire2026_ir_sr",
+    "16_method_weather_sr":        PROJECT_ROOT / "lv2_micro" / "lv2-save" / "16_method_weather_sr",
+    "17_method_emambair":          PROJECT_ROOT / "lv2_micro" / "lv2-save" / "17_method_emambair",
+    "18_method_gprof_ir":          PROJECT_ROOT / "lv2_micro" / "lv2-save" / "18_method_gprof_ir",
+    "19_method_impa_net":          PROJECT_ROOT / "lv2_micro" / "lv2-save" / "19_method_impa_net",
+    "20_method_multispectral_sr":  PROJECT_ROOT / "lv2_micro" / "lv2-save" / "20_method_multispectral_sr",
 }
 
-METHODS = list(METHOD_SOURCES.keys())
+METHODS = list(ALL_METHOD_SOURCES.keys())
+
+
+def is_already_done(method_name: str) -> bool:
+    """检查是否已有 200ep 完整结果"""
+    result_file = RESULTS_DIR / method_name / "result.json"
+    if not result_file.exists():
+        return False
+    try:
+        with open(result_file) as f:
+            data = json.load(f)
+        return data.get("train_epochs") == MAX_EPOCHS and data.get("status") == "success"
+    except Exception:
+        return False
 
 
 def run_method(method_name: str):
-    """运行单个方法 200 epoch"""
-    source_dir = METHOD_SOURCES[method_name]
+    """运行单个方法 200 epoch，无超时"""
+    source_dir = ALL_METHOD_SOURCES[method_name]
     main_py = source_dir / "main.py"
 
     if not main_py.exists():
         print(f"[错误] {main_py} 不存在，跳过")
         return None
 
-    # 创建方法结果目录
+    # 跳过已完成的
+    if is_already_done(method_name):
+        print(f"  ⏭️ 已有 200ep 结果，跳过")
+        with open(RESULTS_DIR / method_name / "result.json") as f:
+            return json.load(f)
+
+    # 创建结果目录
     result_dir = RESULTS_DIR / method_name
     result_dir.mkdir(parents=True, exist_ok=True)
 
@@ -65,7 +96,7 @@ def run_method(method_name: str):
     print(f"开始训练: {method_name}")
     print(f"来源: {source_dir.relative_to(PROJECT_ROOT)}")
     print(f"开始时间: {start_ts}")
-    print(f"配置: {MAX_EPOCHS} epochs, batch={BATCH_SIZE}, band={BAND}")
+    print(f"配置: {MAX_EPOCHS} epochs, batch={BATCH_SIZE}, band={BAND}, 无超时")
     print(f"{'='*60}")
 
     env = os.environ.copy()
@@ -90,6 +121,7 @@ def run_method(method_name: str):
         with open(log_file, "w") as log_f:
             log_f.write(f"[{start_ts}] 开始训练 {method_name}\n")
             log_f.write(f"命令: {' '.join(cmd)}\n")
+            log_f.write(f"配置: {MAX_EPOCHS} epochs, 无超时\n")
             log_f.write("=" * 60 + "\n")
             log_f.flush()
 
@@ -107,16 +139,16 @@ def run_method(method_name: str):
                 log_f.write(line)
                 log_f.flush()
 
-                # 解析 epoch 行
+                # 解析所有字段
                 m = re.search(r'Epoch\s*\[(\d+)/\d+\]', line)
                 if m:
                     last_epoch = int(m.group(1))
 
-                m = re.search(r'[Vv]al\s*[Pp][Ss][Nn][Rr][:\s]+([\d.]+)', line)
+                m = re.search(r'[Vv]al[\s_]*[Pp][Ss][Nn][Rr][:\s]+([\d.]+)', line)
                 if m:
                     last_psnr = float(m.group(1))
 
-                m = re.search(r'[Vv]al\s*[Ss][Ss][Ii][Mm][:\s]+([\d.]+)', line)
+                m = re.search(r'[Vv]al[\s_]*[Ss][Ss][Ii][Mm][:\s]+([\d.]+)', line)
                 if m:
                     last_ssim = float(m.group(1))
 
@@ -124,9 +156,8 @@ def run_method(method_name: str):
                 if m:
                     last_loss = float(m.group(1))
 
-                # 每 CHECKPOINT_EVERY epoch 记录快照
+                # 所有字段解析完毕后检查快照
                 if last_epoch > 0 and last_epoch % CHECKPOINT_EVERY == 0:
-                    # 避免同一 epoch 重复记录
                     if not snapshots or snapshots[-1]["epoch"] != last_epoch:
                         snap = {
                             "epoch": last_epoch,
@@ -138,7 +169,6 @@ def run_method(method_name: str):
                         snapshots.append(snap)
                         print(f"  📌 Epoch {last_epoch}: PSNR={last_psnr:.2f}, SSIM={last_ssim:.4f}")
 
-                        # 保存快照
                         with open(snapshot_file, "w") as sf:
                             json.dump(snapshots, sf, indent=2)
 
@@ -176,7 +206,10 @@ def run_method(method_name: str):
             "best_psnr": last_psnr if last_psnr > 0 else None,
         }
 
+    # 统一写入运行时间
     result_data["runtime_seconds"] = runtime
+    result_data["runtime_minutes"] = round(runtime / 60, 1)
+    result_data["runtime_hours"] = round(runtime / 3600, 2)
     result_data["start_time"] = start_ts
     result_data["end_time"] = end_ts
     result_data["snapshots"] = snapshots
@@ -185,7 +218,7 @@ def run_method(method_name: str):
         json.dump(result_data, f, indent=2, ensure_ascii=False)
 
     print(f"结束时间: {end_ts}")
-    print(f"运行时长: {runtime/3600:.1f} 小时")
+    print(f"运行时长: {runtime/3600:.2f} 小时 ({runtime/60:.0f} 分钟)")
     print(f"最终: Epoch {last_epoch}/{MAX_EPOCHS}, PSNR={last_psnr:.2f}, SSIM={last_ssim:.4f}")
 
     return result_data
@@ -193,10 +226,12 @@ def run_method(method_name: str):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description='LV3 统一深度训练')
-    parser.add_argument('--methods', nargs='+', help='指定方法编号，如 04 05 06')
+    parser = argparse.ArgumentParser(description='LV3 统一深度训练 v2')
+    parser.add_argument('--methods', nargs='+', help='指定方法编号，如 02 03 07')
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--band', type=str, default='CH07')
+    parser.add_argument('--skip-done', action='store_true', default=True, help='跳过已有200ep结果的方法')
+    parser.add_argument('--force', action='store_true', help='强制重跑所有方法')
     args = parser.parse_args()
 
     global MAX_EPOCHS, BAND
@@ -209,30 +244,55 @@ def main():
     else:
         filtered = METHODS
 
+    # 检查已完成的方法
+    todo = []
+    skipped = []
+    for m in filtered:
+        if args.force or not args.skip_done or not is_already_done(m):
+            todo.append(m)
+        else:
+            skipped.append(m)
+
     print("=" * 60)
-    print("FY-4B SR — LV3 统一深度训练")
-    print(f"方法数: {len(filtered)}")
+    print("FY-4B SR — LV3 统一深度训练 v2")
+    print(f"全部方法: {len(filtered)}")
+    print(f"跳过(已200ep): {len(skipped)} → {', '.join(skipped) if skipped else '无'}")
+    print(f"待训练: {len(todo)} → {', '.join(todo)}")
     print(f"Epochs: {MAX_EPOCHS}")
     print(f"Band: {BAND}")
-    print(f"方法: {', '.join(filtered)}")
+    print(f"超时: 无")
     print("=" * 60)
+
+    if not todo:
+        print("所有方法均已有 200ep 结果，无需训练。")
+        print("使用 --force 强制重跑。")
+        return
 
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     all_results = []
-    for i, method in enumerate(filtered, 1):
-        print(f"\n[{i}/{len(filtered)}] {method}")
+    for i, method in enumerate(todo, 1):
+        print(f"\n[{i}/{len(todo)}] {method}")
         result = run_method(method)
         if result:
             all_results.append(result)
 
+    # 收集跳过方法的结果
+    for m in skipped:
+        try:
+            with open(RESULTS_DIR / m / "result.json") as f:
+                all_results.append(json.load(f))
+        except Exception:
+            pass
+
     # 保存汇总
     summary = {
-        "phase": "LV3_deep_training",
+        "phase": "LV3_deep_training_v2",
         "band": BAND,
         "max_epochs": MAX_EPOCHS,
         "total_methods": len(filtered),
-        "completed": len(all_results),
+        "newly_trained": len(todo),
+        "skipped_done": len(skipped),
         "results": sorted(all_results, key=lambda x: x.get("best_psnr") or x.get("val_psnr") or 0, reverse=True),
         "generated_at": datetime.now().isoformat(),
     }
@@ -253,8 +313,12 @@ def main():
         ssim_str = f"{ssim:.4f}" if ssim else "N/A"
         ep = r.get("epochs") or r.get("train_epochs", "?")
         rt = r.get("runtime_seconds", 0)
-        print(f"  {i}. {r['method']}: PSNR={psnr_str}, SSIM={ssim_str}, "
-              f"Epochs={ep}, Runtime={rt/3600:.1f}h")
+        params = r.get("model_params", "?")
+        infer = r.get("inference_time_ms", "?")
+        status = r.get("status", "?")
+        print(f"  {i:2d}. {r['method']}: PSNR={psnr_str}, SSIM={ssim_str}, "
+              f"Ep={ep}, Params={params}, Infer={infer}ms, "
+              f"Runtime={rt/60:.0f}min, Status={status}")
 
 
 if __name__ == "__main__":
