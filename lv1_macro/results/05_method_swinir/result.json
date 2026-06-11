@@ -1,0 +1,17 @@
+{
+  "method": "05_method_swinir",
+  "band": "CH07",
+  "val_psnr": 44.11,
+  "val_ssim": 0.9822,
+  "val_rmse": 0.007,
+  "train_time": 396.22,
+  "train_epochs": 50,
+  "model_params": 406441,
+  "model_size_mb": 1.55,
+  "inference_time_ms": 13.28,
+  "status": "success",
+  "timestamp": "2026-04-25T11:25:11",
+  "runtime_seconds": 405.272215,
+  "start_time": "2026-04-25 11:18:27",
+  "end_time": "2026-04-25 11:25:12"
+}

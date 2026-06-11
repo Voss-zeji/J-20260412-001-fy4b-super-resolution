@@ -1,0 +1,10 @@
+{
+  "method": "20_method_multispectral_sr",
+  "band": "CH07",
+  "status": "partial",
+  "epochs": 12,
+  "best_psnr": 29.94,
+  "runtime_seconds": 1800.202902,
+  "start_time": "2026-05-20 15:24:29",
+  "end_time": "2026-05-20 15:54:29"
+}

@@ -1,0 +1,40 @@
+{
+  "calibrated_at": "2026-06-10",
+  "n_pairs": 5,
+  "psf": {
+    "type": "gaussian",
+    "sigma": 0.384,
+    "kernel_size": 3
+  },
+  "noise": {
+    "type": "gaussian",
+    "mean": 0.1891,
+    "std": 0.4355,
+    "mad": 0.1102
+  },
+  "degradation_pipeline": [
+    {
+      "step": 1,
+      "operation": "gaussian_blur(sigma=0.384)"
+    },
+    {
+      "step": 2,
+      "operation": "downsample_2x(average_pool)"
+    },
+    {
+      "step": 3,
+      "operation": "add_gaussian_noise(std=0.4355)"
+    }
+  ],
+  "bicubic_baseline_rmse": 1.0289,
+  "optimized_rmse": 0.5275,
+  "improvement_pct": 48.7,
+  "residual_stats": {
+    "mean": 0.1891,
+    "std": 0.4355,
+    "mad": 0.1102,
+    "skewness": -6.73,
+    "kurtosis": 653.6,
+    "note": "High kurtosis indicates non-Gaussian heavy tails (edge/discontinuity effects)"
+  }
+}

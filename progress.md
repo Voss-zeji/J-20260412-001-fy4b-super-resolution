@@ -4,179 +4,38 @@
 - **任务ID**: J-20260412-001
 - **创建日期**: 2026-04-12
 - **状态**: 进行中
-- **方法论**: 三层实验架构（参考 autoresearch）
+- **方法论**: 三层实验架构 + 退化模拟（v2 修正）
 
 ## 执行日志
 
-### 2026-04-12
-- [x] 创建任务目录结构
-- [x] 从 GPU 服务器复制 FY4B 超分辨率代码
-- [x] 按照本地规范重新配置文件
-- [x] **设计三层实验架构**
-  - 创建 `ARCHITECTURE.md` - 架构设计文档
-  - **lv1_macro** (宏观层): 方法间比较
-    - 创建 `lv1_macro/README.md` - 统一接口规范
-    - 设计方法目录结构：`methods/XX_category_name/`
-    - 定义公平比较原则：相同数据、预算、指标
-  - **lv2_micro** (微观层): 模型内优化（autoresearch 模式）
-    - 创建 `lv2_micro/README.md` - autoresearch 工作流
-    - 创建 `run_experiment.sh` - 自动化实验脚本
-    - 创建 `analyze.py` - 结果分析工具
-    - 设计实验记录格式：`results.tsv`
-  - **lv3_fusion** (融合层): 方法组合创新
-    - 创建 `lv3_fusion/README.md` - 融合策略说明
-    - 定义触发条件和决策标准
-- [x] 更新 `program.md` - 完整的三层架构说明
-- [x] 更新 `.gitignore` - 添加输出目录忽略规则
-- [x] 初始提交到 git (commit: 323bccb)
-- [x] **实现 lv1_macro 五种超分辨率方法**
-  - 01_baseline_bicubic: 双三次插值基线
-  - 02_baseline_srcnn: SRCNN (2015)
-  - 03_method_edsr: EDSR (2017)
-  - 04_method_pftsr: PFT-SR (自定义)
-  - 05_method_swinir: SwinIR (2021)
-- [x] 创建 `compare.py` - 统一比较入口
-- [x] 创建 `lv1_macro/select_best.py` - 最佳方法选择
+### 2026-04-12 — 初始搭建
+- [x] 创建任务目录结构，从 GPU 服务器复制代码
+- [x] 设计三层实验架构（lv1_macro / lv2_micro / lv3_fusion）
+- [x] 初始提交 (commit 323bccb)
 
-## 待办清单
+### 2026-04-14 ~ 2026-04-26 — 方法扩展
+- [x] 5 → 9 → 29+ 种超分方法收集与适配
+- [x] CH07/CH08 定标批量处理
 
-### lv1_macro - 宏观层
-- [x] 收集候选方法代码
-  - [x] 01_baseline_bicubic (双三次插值)
-  - [x] 02_baseline_srcnn (SRCNN)
-  - [x] 03_method_edsr (EDSR)
-  - [x] 04_method_pftsr (PFT-SR)
-  - [x] 05_method_swinir (SwinIR)
-  - [x] 06_method_tinynina (TinyNina Edge-AI)
-  - [x] 07_method_m2ir (Mamba SSM)
-  - [x] 08_method_realrestorer (真实世界退化)
-  - [x] 09_method_lcmsr (潜空间一致性)
-- [x] 实现统一接口适配
-- [x] 运行宏观比较 (CH07)
-- [ ] 选择最佳方法进入 lv2_micro
+### 2026-05-23 ~ 2026-05-25 — LV3 深度训练（CH07, 200 epoch）
+- [x] 24 种方法统一 200 epoch 训练
+- [x] Top-10 PSNR 全部 > 44 dB（基于 CH07 真实配对）
+- [x] 3 个最佳 checkpoint 保存（EmambaIR, SFGSwinIR, PhysicsPFTSR）
 
-### 数据预处理
-- [x] CH07 calibration 定标 (2000M/4000M, 20250301-20250309)
-- [x] CH08 calibration 定标 (2000M/4000M, 20250301-20250309)
-- [x] CH07/CH08 后续日期 calibration (20250310-20250316)
-  - [x] 修复脚本支持 NOM 和 CAL 两种原始格式
-  - [x] 远程 GPU 批量处理完成
+### 2026-06-07 — Top-10 选定
+- [x] TOP10_SELECTION.md 生成
+- [x] 3 组融合策略规划
 
-### lv2_micro - 微观层
-- [ ] 初始化基线实验
-- [ ] 运行 autoresearch 优化循环
-- [ ] 达到目标 PSNR > 35 dB
+### 2026-06-08 — 产品生成 & 数据审查
+- [x] CH08 数据准备（19184 patches）
+- [x] CH07 全盘 SR 产品生成（3 模型 × 10 样本）
+- [x] CH08 zero-shot 评估（43.6 dB）— ⚠️ 后续确认为无效（HR 是内插）
+- [x] 发现关键问题：CH08 2000M 为 4000M 内插产物，非独立观测
+- [x] program.md 修正：更新数据事实、设计退化方案
 
-### lv3_fusion - 融合层（可选）
-- [ ] 检查触发条件（top-2 gap < 0.5 dB）
-- [ ] 实现融合策略（如需要）
-
-### 验证与输出
-- [ ] 在 CH08 通道验证泛化性
-- [ ] 生成对比可视化
-- [ ] 保存最终模型
-
-## 实验记录
-
-### lv1_macro - 宏观比较
-
-| 日期 | 方法 | val_psnr | val_ssim | 参数量 | 状态 |
-|------|------|----------|----------|--------|------|
-| - | 01_baseline_bicubic | - | - | 0 | ✅ 已完成 |
-| - | 02_baseline_srcnn | - | - | ~20K | ✅ 已完成 |
-| - | 03_method_edsr | - | - | ~1.5M | ✅ 已完成 |
-| - | 04_method_pftsr | - | - | ~2.8M | ✅ 已完成 |
-| - | 05_method_swinir | - | - | ~1M | ✅ 已完成 |
-| - | 06_method_tinynina | - | - | ~50K | ✅ 已完成 |
-| - | 07_method_m2ir | - | - | ~500K | ✅ 已完成 |
-| - | 08_method_realrestorer | - | - | ~800K | ✅ 已完成 |
-| - | 09_method_lcmsr | - | - | ~1.2M | ✅ 已完成 |
-
-**9种方法架构对比：**
-
-| 编号 | 方法 | 架构类型 | 核心特点 | 论文来源 |
-|------|------|----------|----------|----------|
-| 01 | bicubic | 传统插值 | 无参数基线 | 经典 |
-| 02 | SRCNN | CNN先驱 | 3层卷积 | CVPR 2015 |
-| 03 | EDSR | CNN优化 | 无BN、残差缩放 | CVPRW 2017 |
-| 04 | PFT-SR | CNN+Attention | 渐进特征转移 | 自定义 |
-| 05 | SwinIR | Transformer | 移位窗口注意力 | ICCV 2021 |
-| 06 | TinyNina | Edge-AI CNN | 深度可分离、通道门控 | ArXiv 2604.04445 |
-| 07 | M2IR | Mamba SSM | 选择性状态扫描 | ArXiv 2603.14816 |
-| 08 | RealRestorer | 真实世界退化 | 退化估计+条件残差 | 2026 |
-| 09 | LCMSR | 扩散模型 | 潜空间一致性、单步推理 | ArXiv 2503.19505 |
-
-### lv2_micro - 微观优化
-
-| 日期 | 实验 | val_psnr | 改动 | 状态 |
-|------|------|----------|------|------|
-| - | - | - | - | 待开始 |
-
-## 项目结构（三层架构）
-
-```
-.
-├── ARCHITECTURE.md              # 架构设计文档（核心）
-├── program.md                   # 任务指令
-├── progress.md                  # 进度记录
-├── compare.py                   # 统一比较入口
-├── utils.py                     # 固定工具（不可修改）
-├── data/                        # 统一数据加载
-│   └── fy4b_dataset.py
-├── lv1_macro/                   # ========== 宏观层 ==========
-│   ├── README.md                # 宏观层说明
-│   ├── methods/                 # 各方法独立目录
-│   │   ├── 01_baseline_bicubic/
-│   │   ├── 02_baseline_srcnn/
-│   │   ├── 03_method_edsr/
-│   │   ├── 04_method_pftsr/
-│   │   └── 05_method_swinir/
-│   ├── results.csv              # 比较结果表
-│   └── select_best.py           # 选择最佳方法
-├── lv2_micro/                   # ========== 微观层 ==========
-│   ├── README.md                # 微观层说明（autoresearch）
-│   ├── TARGET_METHOD            # 当前优化目标
-│   ├── experiments/             # 实验目录
-│   ├── results.tsv              # 实验记录
-│   ├── run_experiment.sh        # 自动化脚本
-│   └── analyze.py               # 结果分析
-├── lv3_fusion/                  # ========== 融合层 ==========
-│   └── README.md
-├── preprocessing/               # 数据预处理
-└── results/                     # 最终输出
-```
-
-## 三层架构与 autoresearch 的对应
-
-| autoresearch | 本架构对应 | 说明 |
-|--------------|-----------|------|
-| `train.py` | `lv2_micro/experiments/*/main.py` | 单一文件迭代 |
-| `prepare.py` | `utils.py` + `data/` | 固定工具 |
-| `program.md` | `program.md` + `ARCHITECTURE.md` | 任务定义 |
-| `val_bpb` | `val_psnr` | 单一核心指标 |
-| git commit/reset | `lv2_micro` 层 | 微观决策 |
-| 永不停止 | `run_experiment.sh` | 自动化循环 |
-
-## 使用方法速查
-
-```bash
-# lv1_macro: 宏观比较
-python compare.py --level macro --band CH07
-
-# lv2_micro: 微观优化（autoresearch模式）
-cd lv2_micro
-./run_experiment.sh CH07 20260412_baseline "baseline"
-
-# 分析结果
-python analyze.py --plot --suggest
-
-# lv3_fusion: 融合（可选）
-cd ../lv3_fusion
-python fusion.py --methods edsr,pftsr
-```
-
-## 参考
-
-- [ARCHITECTURE.md](ARCHITECTURE.md) - 详细架构设计
-- [autoresearch](https://github.com/karpathy/autoresearch) - 原始灵感
-- [PFT-SR](https://github.com/CVL-UESTC/PFT-SR) - 基础模型
+### 待办
+- [ ] 退化模型校准 + CH08 合成测试集
+- [ ] 修正 CH08 评估
+- [ ] CH08 真实 4000M SR 推理
+- [ ] 对比可视化
+- [ ] LV3 融合（可选）

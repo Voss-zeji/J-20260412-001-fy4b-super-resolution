@@ -1,0 +1,49 @@
+{
+  "method": "07_method_m2ir",
+  "band": "CH07",
+  "val_psnr": 34.21,
+  "val_ssim": 0.8742,
+  "val_rmse": 0.0209,
+  "train_time": 5664.42,
+  "train_epochs": 200,
+  "model_params": 328993,
+  "model_size_mb": 1.26,
+  "inference_time_ms": 172.38,
+  "status": "success",
+  "timestamp": "2026-05-23T19:37:30",
+  "runtime_seconds": 5695.743143,
+  "runtime_minutes": 94.9,
+  "runtime_hours": 1.58,
+  "start_time": "2026-05-23 18:02:36",
+  "end_time": "2026-05-23 19:37:31",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 31.24,
+      "ssim": 0.8284,
+      "loss": 0.0194,
+      "timestamp": "2026-05-23 18:26:56"
+    },
+    {
+      "epoch": 100,
+      "psnr": 33.2,
+      "ssim": 0.8598,
+      "loss": 0.0133,
+      "timestamp": "2026-05-23 18:50:49"
+    },
+    {
+      "epoch": 150,
+      "psnr": 34.03,
+      "ssim": 0.872,
+      "loss": 0.0111,
+      "timestamp": "2026-05-23 19:13:52"
+    },
+    {
+      "epoch": 200,
+      "psnr": 34.21,
+      "ssim": 0.8742,
+      "loss": 0.0101,
+      "timestamp": "2026-05-23 19:37:06"
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "phase": "LV3_deep_training_v2",
+  "band": "CH07",
+  "max_epochs": 200,
+  "total_methods": 2,
+  "newly_trained": 2,
+  "skipped_done": 0,
+  "results": [
+    {
+      "method": "04_method_pftsr",
+      "band": "CH07",
+      "val_psnr": 44.35,
+      "val_ssim": 0.9816,
+      "val_rmse": 0.0068,
+      "train_time": 5015.35,
+      "train_epochs": 200,
+      "model_params": 1000103,
+      "model_size_mb": 3.82,
+      "inference_time_ms": 39.59,
+      "status": "success",
+      "timestamp": "2026-05-22T22:58:07",
+      "runtime_seconds": 5046.901046,
+      "start_time": "2026-05-22 21:34:01",
+      "end_time": "2026-05-22 22:58:08",
+      "snapshots": [
+        {
+          "epoch": 50,
+          "psnr": 0.0,
+          "ssim": 0.0,
+          "loss": 0.005,
+          "timestamp": "2026-05-22 21:55:02"
+        },
+        {
+          "epoch": 100,
+          "psnr": 0.0,
+          "ssim": 0.0,
+          "loss": 0.0046,
+          "timestamp": "2026-05-22 22:16:01"
+        },
+        {
+          "epoch": 150,
+          "psnr": 0.0,
+          "ssim": 0.0,
+          "loss": 0.0054,
+          "timestamp": "2026-05-22 22:36:57"
+        },
+        {
+          "epoch": 200,
+          "psnr": 0.0,
+          "ssim": 0.0,
+          "loss": 0.0051,
+          "timestamp": "2026-05-22 22:57:44"
+        }
+      ]
+    },
+    {
+      "method": "14_method_dualscalerestore",
+      "band": "CH07",
+      "val_psnr": 44.34,
+      "val_ssim": 0.9803,
+      "val_rmse": 0.0069,
+      "train_time": 4825.26,
+      "train_epochs": 200,
+      "model_params": 1586415,
+      "model_size_mb": 6.05,
+      "inference_time_ms": 32.71,
+      "status": "success",
+      "timestamp": "2026-05-23T07:07:26",
+      "runtime_seconds": 4854.653652,
+      "start_time": "2026-05-23 05:46:32",
+      "end_time": "2026-05-23 07:07:27",
+      "snapshots": [
+        {
+          "epoch": 50,
+          "psnr": 0.0,
+          "ssim": 0.0,
+          "loss": 0.0054,
+          "timestamp": "2026-05-23 06:06:47"
+        },
+        {
+          "epoch": 100,
+          "psnr": 0.0,
+          "ssim": 0.0,
+          "loss": 0.0058,
+          "timestamp": "2026-05-23 06:26:53"
+        },
+        {
+          "epoch": 150,
+          "psnr": 0.0,
+          "ssim": 0.0,
+          "loss": 0.005,
+          "timestamp": "2026-05-23 06:46:59"
+        },
+        {
+          "epoch": 200,
+          "psnr": 0.0,
+          "ssim": 0.0,
+          "loss": 0.0049,
+          "timestamp": "2026-05-23 07:07:03"
+        }
+      ]
+    }
+  ],
+  "generated_at": "2026-06-09T20:43:30.512623"
+}

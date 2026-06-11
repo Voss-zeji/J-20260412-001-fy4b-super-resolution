@@ -1,0 +1,17 @@
+{
+  "method": "10_method_swinrestorer",
+  "band": "CH07",
+  "val_psnr": 44.03,
+  "val_ssim": 0.9809,
+  "val_rmse": 0.007,
+  "train_time": 1200.62,
+  "train_epochs": 50,
+  "model_params": 581020,
+  "model_size_mb": 2.22,
+  "inference_time_ms": 36.62,
+  "status": "success",
+  "timestamp": "2026-05-20T11:28:46",
+  "runtime_seconds": 1230.021975,
+  "start_time": "2026-05-20 11:08:17",
+  "end_time": "2026-05-20 11:28:47"
+}

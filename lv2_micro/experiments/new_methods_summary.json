@@ -1,0 +1,111 @@
+{
+  "total_methods": 15,
+  "completed": 15,
+  "results": [
+    {
+      "method": "15_method_ntire2026_ir_sr",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 9.103218,
+      "epochs": 0
+    },
+    {
+      "method": "16_method_weather_sr",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.027577,
+      "epochs": 0
+    },
+    {
+      "method": "17_method_emambair",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.025097,
+      "epochs": 0
+    },
+    {
+      "method": "18_method_gprof_ir",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.020035,
+      "epochs": 0
+    },
+    {
+      "method": "19_method_impa_net",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.013171,
+      "epochs": 0
+    },
+    {
+      "method": "20_method_multispectral_sr",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.023978,
+      "epochs": 0
+    },
+    {
+      "method": "21_method_r2h_diff",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.024987,
+      "epochs": 0
+    },
+    {
+      "method": "22_method_pet_adapter",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.012781,
+      "epochs": 0
+    },
+    {
+      "method": "23_method_normalizing_trajectory",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.024448,
+      "epochs": 0
+    },
+    {
+      "method": "24_method_ctdm",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.02382,
+      "epochs": 0
+    },
+    {
+      "method": "25_method_noisegate",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.018582,
+      "epochs": 0
+    },
+    {
+      "method": "26_method_satsurfgs",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.016494,
+      "epochs": 0
+    },
+    {
+      "method": "27_method_sat3r",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.025351,
+      "epochs": 0
+    },
+    {
+      "method": "28_method_crossview_3d",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.022519,
+      "epochs": 0
+    },
+    {
+      "method": "29_method_infogeo",
+      "status": "partial",
+      "val_psnr": null,
+      "runtime_seconds": 0.022226,
+      "epochs": 0
+    }
+  ]
+}

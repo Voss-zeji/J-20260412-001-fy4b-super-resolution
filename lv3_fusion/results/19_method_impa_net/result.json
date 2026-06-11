@@ -1,0 +1,48 @@
+{
+  "method": "19_method_impa_net",
+  "band": "CH07",
+  "epochs": 200,
+  "best_psnr": 44.12259902931092,
+  "best_ssim": 0.9805095326900483,
+  "best_epoch": 163,
+  "status": "success",
+  "final_psnr": 44.09480218589013,
+  "final_ssim": 0.9817485684156417,
+  "runtime_seconds": 28485.569358,
+  "runtime_minutes": 474.8,
+  "runtime_hours": 7.91,
+  "start_time": "2026-05-25 08:25:33",
+  "end_time": "2026-05-25 16:20:19",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 43.14,
+      "ssim": 0.0,
+      "loss": 0.0069,
+      "timestamp": "2026-05-25 10:25:51"
+    },
+    {
+      "epoch": 100,
+      "psnr": 43.44,
+      "ssim": 0.0,
+      "loss": 0.0052,
+      "timestamp": "2026-05-25 12:24:48"
+    },
+    {
+      "epoch": 150,
+      "psnr": 44.02,
+      "ssim": 0.0,
+      "loss": 0.0056,
+      "timestamp": "2026-05-25 14:21:26"
+    },
+    {
+      "epoch": 200,
+      "psnr": 44.09,
+      "ssim": 0.0,
+      "loss": 0.0045,
+      "timestamp": "2026-05-25 16:20:18"
+    }
+  ],
+  "model_params": 1116663,
+  "inference_time_ms": 9.02
+}

@@ -1,0 +1,47 @@
+{
+  "method": "06_method_tinynina",
+  "band": "CH07",
+  "val_psnr": 44.12,
+  "val_ssim": 0.9815,
+  "val_rmse": 0.007,
+  "train_time": 4976.06,
+  "train_epochs": 200,
+  "model_params": 45418,
+  "model_size_mb": 0.17,
+  "inference_time_ms": 18.79,
+  "status": "success",
+  "timestamp": "2026-05-23T01:44:42",
+  "runtime_seconds": 5005.921775,
+  "start_time": "2026-05-23 00:21:17",
+  "end_time": "2026-05-23 01:44:43",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0049,
+      "timestamp": "2026-05-23 00:42:22"
+    },
+    {
+      "epoch": 100,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0047,
+      "timestamp": "2026-05-23 01:03:24"
+    },
+    {
+      "epoch": 150,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0048,
+      "timestamp": "2026-05-23 01:24:08"
+    },
+    {
+      "epoch": 200,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0045,
+      "timestamp": "2026-05-23 01:44:20"
+    }
+  ]
+}

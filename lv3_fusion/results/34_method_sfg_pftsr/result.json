@@ -1,0 +1,15 @@
+{
+  "method": "34_method_sfg_pftsr",
+  "band": "CH07",
+  "best_psnr": 43.9746,
+  "best_ssim": 0.9788,
+  "best_epoch": 200,
+  "final_psnr": 43.9746,
+  "final_ssim": 0.9788,
+  "train_epochs": 200,
+  "model_params": 703233,
+  "inference_time_ms": 21.74,
+  "train_time": 8112.18,
+  "status": "success",
+  "timestamp": "2026-06-07T09:01:51"
+}

@@ -1,0 +1,10 @@
+{
+  "method": "19_method_impa_net",
+  "band": "CH07",
+  "status": "partial",
+  "epochs": 12,
+  "best_psnr": 42.4,
+  "runtime_seconds": 1800.211581,
+  "start_time": "2026-05-20 14:54:29",
+  "end_time": "2026-05-20 15:24:29"
+}

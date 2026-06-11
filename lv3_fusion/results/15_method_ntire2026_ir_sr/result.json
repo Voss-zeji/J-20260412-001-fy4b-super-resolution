@@ -1,0 +1,48 @@
+{
+  "method": "15_method_ntire2026_ir_sr",
+  "band": "CH07",
+  "epochs": 200,
+  "best_psnr": 44.03581726706816,
+  "best_ssim": 0.9812231439352036,
+  "best_epoch": 143,
+  "status": "success",
+  "final_psnr": 43.968816292311615,
+  "final_ssim": 0.9806495845317841,
+  "runtime_seconds": 29687.631371,
+  "runtime_minutes": 494.8,
+  "runtime_hours": 8.25,
+  "start_time": "2026-05-23 23:56:43",
+  "end_time": "2026-05-24 08:11:30",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 43.69,
+      "ssim": 0.9792,
+      "loss": 0.0055,
+      "timestamp": "2026-05-24 02:01:11"
+    },
+    {
+      "epoch": 100,
+      "psnr": 43.77,
+      "ssim": 0.9797,
+      "loss": 0.0049,
+      "timestamp": "2026-05-24 04:05:40"
+    },
+    {
+      "epoch": 150,
+      "psnr": 43.88,
+      "ssim": 0.9802,
+      "loss": 0.0046,
+      "timestamp": "2026-05-24 06:10:20"
+    },
+    {
+      "epoch": 200,
+      "psnr": 43.97,
+      "ssim": 0.9806,
+      "loss": 0.0054,
+      "timestamp": "2026-05-24 08:11:29"
+    }
+  ],
+  "model_params": 1168924,
+  "inference_time_ms": 339.09
+}

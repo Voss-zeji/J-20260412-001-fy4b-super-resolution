@@ -1,0 +1,17 @@
+{
+  "method": "01_baseline_bicubic",
+  "band": "CH07",
+  "val_psnr": Infinity,
+  "val_ssim": 0.9765,
+  "val_rmse": 0.0076,
+  "train_time": 3.96,
+  "train_epochs": 0,
+  "model_params": 0,
+  "model_size_mb": 0.0,
+  "inference_time_ms": 0.2,
+  "status": "success",
+  "timestamp": "2026-04-25T11:00:41",
+  "runtime_seconds": 15.178252,
+  "start_time": "2026-04-25 11:00:26",
+  "end_time": "2026-04-25 11:00:41"
+}

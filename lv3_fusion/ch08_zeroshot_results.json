@@ -1,0 +1,22 @@
+{
+  "band": "CH08",
+  "source": "zero-shot",
+  "results": {
+    "EmambaIR": {
+      "ch08_psnr": 43.7019,
+      "ch08_ssim": 0.976,
+      "infer_ms": 7.6
+    },
+    "SFGSwinIR": {
+      "ch08_psnr": 43.5814,
+      "ch08_ssim": 0.9758,
+      "infer_ms": 3.24
+    },
+    "PhysicsPFTSR": {
+      "ch08_psnr": 43.5492,
+      "ch08_ssim": 0.9758,
+      "infer_ms": 1.04
+    }
+  },
+  "generated_at": "2026-06-08 15:50:16"
+}

@@ -1,0 +1,15 @@
+{
+  "method": "32_method_physics_pftsr",
+  "band": "CH07",
+  "best_psnr": 44.173,
+  "best_ssim": 0.9796,
+  "best_epoch": 180,
+  "final_psnr": 44.173,
+  "final_ssim": 0.9796,
+  "train_epochs": 200,
+  "model_params": 481793,
+  "inference_time_ms": 25.85,
+  "train_time": 8383.61,
+  "status": "success",
+  "timestamp": "2026-06-07T02:08:07"
+}

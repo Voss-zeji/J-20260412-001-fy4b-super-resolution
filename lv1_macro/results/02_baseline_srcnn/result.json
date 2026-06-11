@@ -1,0 +1,17 @@
+{
+  "method": "02_baseline_srcnn",
+  "band": "CH07",
+  "val_psnr": 40.84,
+  "val_ssim": 0.9717,
+  "val_rmse": 0.0096,
+  "train_time": 322.6,
+  "train_epochs": 50,
+  "model_params": 8129,
+  "model_size_mb": 0.03,
+  "inference_time_ms": 14.62,
+  "status": "success",
+  "timestamp": "2026-04-25T11:06:18",
+  "runtime_seconds": 332.677362,
+  "start_time": "2026-04-25 11:00:46",
+  "end_time": "2026-04-25 11:06:19"
+}

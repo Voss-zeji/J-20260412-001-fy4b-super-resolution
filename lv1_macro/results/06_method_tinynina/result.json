@@ -1,0 +1,17 @@
+{
+  "method": "06_method_tinynina",
+  "band": "CH07",
+  "val_psnr": 44.39,
+  "val_ssim": 0.9808,
+  "val_rmse": 0.0069,
+  "train_time": 337.1,
+  "train_epochs": 50,
+  "model_params": 45418,
+  "model_size_mb": 0.17,
+  "inference_time_ms": 10.12,
+  "status": "success",
+  "timestamp": "2026-04-25T11:31:02",
+  "runtime_seconds": 345.744972,
+  "start_time": "2026-04-25 11:25:17",
+  "end_time": "2026-04-25 11:31:03"
+}

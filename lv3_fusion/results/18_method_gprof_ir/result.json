@@ -1,0 +1,48 @@
+{
+  "method": "18_method_gprof_ir",
+  "band": "CH07",
+  "epochs": 200,
+  "best_psnr": 44.20966373828559,
+  "best_ssim": 0.9816713362932206,
+  "best_epoch": 190,
+  "status": "success",
+  "final_psnr": 44.17046302378405,
+  "final_ssim": 0.9813618469238281,
+  "runtime_seconds": 28975.046799,
+  "runtime_minutes": 482.9,
+  "runtime_hours": 8.05,
+  "start_time": "2026-05-25 00:22:38",
+  "end_time": "2026-05-25 08:25:33",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 43.68,
+      "ssim": 0.0,
+      "loss": 0.0055,
+      "timestamp": "2026-05-25 02:24:16"
+    },
+    {
+      "epoch": 100,
+      "psnr": 43.77,
+      "ssim": 0.0,
+      "loss": 0.0057,
+      "timestamp": "2026-05-25 04:25:07"
+    },
+    {
+      "epoch": 150,
+      "psnr": 44.07,
+      "ssim": 0.0,
+      "loss": 0.0044,
+      "timestamp": "2026-05-25 06:24:16"
+    },
+    {
+      "epoch": 200,
+      "psnr": 44.17,
+      "ssim": 0.0,
+      "loss": 0.0059,
+      "timestamp": "2026-05-25 08:25:33"
+    }
+  ],
+  "model_params": 596679,
+  "inference_time_ms": 40.46
+}

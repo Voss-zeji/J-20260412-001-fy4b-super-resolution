@@ -1,0 +1,33 @@
+{
+  "total_methods": 5,
+  "completed": 3,
+  "results": [
+    {
+      "method": "10_method_swinrestorer",
+      "start_time": "2026-04-26 20:10:46",
+      "end_time": "2026-04-26 20:12:32",
+      "runtime_seconds": 106.004176,
+      "epochs": 10,
+      "val_psnr": 44.24,
+      "status": "success"
+    },
+    {
+      "method": "11_method_edgepft",
+      "start_time": "2026-04-26 20:12:38",
+      "end_time": "2026-04-26 20:13:28",
+      "runtime_seconds": 50.128181,
+      "epochs": 10,
+      "val_psnr": 43.8,
+      "status": "success"
+    },
+    {
+      "method": "12_method_latentswin",
+      "start_time": "2026-04-26 20:13:33",
+      "end_time": "2026-04-26 20:14:45",
+      "runtime_seconds": 71.890273,
+      "epochs": 10,
+      "val_psnr": 43.65,
+      "status": "success"
+    }
+  ]
+}

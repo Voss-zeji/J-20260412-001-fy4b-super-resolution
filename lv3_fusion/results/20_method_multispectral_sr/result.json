@@ -1,0 +1,48 @@
+{
+  "method": "20_method_multispectral_sr",
+  "band": "CH07",
+  "epochs": 200,
+  "best_psnr": 43.16624862688391,
+  "best_ssim": 0.9782398933172226,
+  "best_epoch": 197,
+  "status": "success",
+  "final_psnr": 43.09477948229396,
+  "final_ssim": 0.9781672990322113,
+  "runtime_seconds": 27863.353081,
+  "runtime_minutes": 464.4,
+  "runtime_hours": 7.74,
+  "start_time": "2026-05-25 16:20:19",
+  "end_time": "2026-05-26 00:04:42",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 35.36,
+      "ssim": 0.0,
+      "loss": 0.0088,
+      "timestamp": "2026-05-25 18:15:41"
+    },
+    {
+      "epoch": 100,
+      "psnr": 39.71,
+      "ssim": 0.0,
+      "loss": 0.0064,
+      "timestamp": "2026-05-25 20:10:50"
+    },
+    {
+      "epoch": 150,
+      "psnr": 41.98,
+      "ssim": 0.0,
+      "loss": 0.0058,
+      "timestamp": "2026-05-25 22:05:04"
+    },
+    {
+      "epoch": 200,
+      "psnr": 43.09,
+      "ssim": 0.0,
+      "loss": 0.0053,
+      "timestamp": "2026-05-26 00:04:41"
+    }
+  ],
+  "model_params": 778753,
+  "inference_time_ms": 4.4
+}

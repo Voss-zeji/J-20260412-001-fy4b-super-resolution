@@ -1,0 +1,51 @@
+{
+  "total_methods": 5,
+  "completed": 5,
+  "results": [
+    {
+      "method": "10_method_swinrestorer",
+      "start_time": "2026-04-26 20:28:37",
+      "end_time": "2026-04-26 20:33:28",
+      "runtime_seconds": 290.739501,
+      "epochs": 50,
+      "val_psnr": 44.51,
+      "status": "success"
+    },
+    {
+      "method": "11_method_edgepft",
+      "start_time": "2026-04-26 20:33:38",
+      "end_time": "2026-04-26 20:36:49",
+      "runtime_seconds": 191.194209,
+      "epochs": 50,
+      "val_psnr": 44.1,
+      "status": "success"
+    },
+    {
+      "method": "12_method_latentswin",
+      "start_time": "2026-04-26 20:36:59",
+      "end_time": "2026-04-26 20:42:07",
+      "runtime_seconds": 308.611147,
+      "epochs": 50,
+      "val_psnr": 43.88,
+      "status": "success"
+    },
+    {
+      "method": "13_method_mambapft",
+      "start_time": "2026-04-26 20:42:17",
+      "end_time": "2026-04-26 21:12:18",
+      "runtime_seconds": 1800.1692,
+      "epochs": 10,
+      "val_psnr": 43.56,
+      "status": "partial"
+    },
+    {
+      "method": "14_method_dualscalerestore",
+      "start_time": "2026-04-26 21:12:28",
+      "end_time": "2026-04-26 21:23:11",
+      "runtime_seconds": 643.158106,
+      "epochs": 50,
+      "val_psnr": 44.79,
+      "status": "success"
+    }
+  ]
+}

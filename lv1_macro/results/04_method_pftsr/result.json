@@ -1,0 +1,17 @@
+{
+  "method": "04_method_pftsr",
+  "band": "CH07",
+  "val_psnr": 44.74,
+  "val_ssim": 0.9831,
+  "val_rmse": 0.0067,
+  "train_time": 350.07,
+  "train_epochs": 50,
+  "model_params": 1000103,
+  "model_size_mb": 3.82,
+  "inference_time_ms": 52.06,
+  "status": "success",
+  "timestamp": "2026-04-25T11:18:21",
+  "runtime_seconds": 358.577677,
+  "start_time": "2026-04-25 11:12:24",
+  "end_time": "2026-04-25 11:18:22"
+}

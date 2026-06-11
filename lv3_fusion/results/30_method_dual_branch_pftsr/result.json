@@ -1,0 +1,15 @@
+{
+  "method": "30_method_dual_branch_pftsr",
+  "band": "CH07",
+  "best_psnr": 44.238,
+  "best_ssim": 0.9799,
+  "best_epoch": 184,
+  "final_psnr": 44.238,
+  "final_ssim": 0.9799,
+  "train_epochs": 200,
+  "model_params": 655585,
+  "inference_time_ms": 32.85,
+  "train_time": 8238.46,
+  "status": "success",
+  "timestamp": "2026-06-06T23:48:16"
+}

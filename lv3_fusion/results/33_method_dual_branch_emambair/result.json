@@ -1,0 +1,15 @@
+{
+  "method": "33_method_dual_branch_emambair",
+  "band": "CH07",
+  "best_psnr": 44.2818,
+  "best_ssim": 0.9798,
+  "best_epoch": 179,
+  "final_psnr": 44.2818,
+  "final_ssim": 0.9798,
+  "train_epochs": 200,
+  "model_params": 1027825,
+  "inference_time_ms": 38.33,
+  "train_time": 8150.37,
+  "status": "success",
+  "timestamp": "2026-06-07T06:46:33"
+}

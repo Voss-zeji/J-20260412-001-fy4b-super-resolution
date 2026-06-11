@@ -1,0 +1,10 @@
+{
+  "method": "16_method_weather_sr",
+  "band": "CH07",
+  "status": "partial",
+  "epochs": 11,
+  "best_psnr": 32.8,
+  "runtime_seconds": 1800.185398,
+  "start_time": "2026-05-20 13:24:28",
+  "end_time": "2026-05-20 13:54:28"
+}

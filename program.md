@@ -1,5 +1,10 @@
 # FY-4B 超分辨率研究
 
+## 地址
+
+- **本地**：`D:/playground/jobs/2026-04/J-20260412-001-fy4b-super-resolution/`
+- **远程**：`gpu-server:/root/jobs/J-20260412-001-fy4b-super-resolution/`
+
 ## 任务目标
 
 对 FY-4B 卫星 AGRI 仪器数据进行超分辨率处理，将 4km 分辨率图像提升至 2km 分辨率。
@@ -7,131 +12,66 @@
 **核心任务**: 4000M → 2000M (4km → 2km) 超分辨率
 
 **支持通道**:
-- CH07 (IR3.90, 中红外)
-- CH08 (IR6.20, 中红外)
+- CH07 (IR3.90, 中红外) — 原生 2000M + 4000M 数据
+- CH08 (IR6.20, 中红外) — 仅原生 4000M，2000M 为内插产物
 
-## 核心设计：三层实验架构
+## 关键数据事实（2026-06-09 更正）
 
-本项目采用分层实验设计，结合 autoresearch 的单一指标决策思想：
+| 通道 | 原生 2000M (5496×5496) | 原生 4000M (2748×2748) | 可用作 SR 训练 |
+|------|:---------------------:|:---------------------:|:--------------:|
+| CH07 | ✅ 独立探测器读数 | ✅ 独立探测器读数 | ✅ **真实配对** |
+| CH08 | ❌ 4000M 内插产物 | ✅ 独立探测器读数 | ❌ HR 无效 |
+
+**验证依据**：降采样 2000M vs 真实 4000M 差异
+- CH07 中位数绝对差: **0.085 K**（2.1% 像素 >1K）→ 有实质差异
+- CH08 中位数绝对差: **0.0175 K**（1.0% 像素 >1K）→ 浮点精度级别，纯内插
+
+**采样参数**：dSamplingAngle 2000M=56", 4000M=112"，确为不同探测器配置
+
+**影响**：
+- 此前所有 CH07 训练（200 epoch, 44+ dB PSNR）使用真实配对数据，结果有效
+- CH08 zero-shot 评估的 43.6 dB 无效，因为 ground truth 是内插的
+- CH08 验证需要退化模拟
+
+## 核心设计：退化模拟 + 三层实验架构
+
+### 退化模型设计
+
+CH08 无原生 2000M 数据，验证时必须使用合成退化构建测试集。
+
+**方法**：以 CH07 为参考，校准退化参数后再用于 CH08
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        三层实验架构                              │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│   lv1_macro (横向)        lv2_micro (纵向)       lv3_fusion    │
-│   ===========             ============           ===========   │
-│   方法间比较        →     方法内优化      →      方法融合      │
-│   哪个方法更好？          怎么调最好？           组合更好？      │
-│                                                                 │
-│   ┌────────────┐                                     ┌──────┐  │
-│   │ 01_bicubic │ 30.2 dB                            │fusion│  │
-│   ├────────────┤          ┌──────────┐              │35.0  │  │
-│   │ 02_srcnn   │ 32.5 dB  │ lr=0.001 │ 34.7 dB      └──────┘  │
-│   ├────────────┤  ──────► ├──────────┤  ──────►              │
-│   │ 03_edsr    │ 34.1 dB  │ depth=4  │ 34.9 dB                 │
-│   ├────────────┤  ──────► └──────────┘                         │
-│   │ 04_pftsr   │ 33.8 dB                                      │
-│   └────────────┘          进入lv2后                            │
-│        ↑                  autoresearch模式                      │
-│   选择最佳方法            永不停止迭代                          │
-│                                                                 │
-│   决策指标: val_psnr      决策指标: val_psnr     决策: 是否>单体 │
-│   动作: 选择进入lv2       动作: commit/reset     动作: 保留/放弃 │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+步骤1: 校准退化参数（基于 CH07 真实配对）
+  CH07 2000M ──[盲退化]──→ CH07 4000M（真实）
+                ↑
+          估算: PSF核 + 噪声模型
+
+步骤2: 构建 CH08 合成验证集
+  CH07 2000M (HR) ──[退化模型]──→ 合成 LR ──[SR模型]──→ SR ↓ 计算PSNR
+                                    ↑
+                              匹配 CH08 4000M 特征
+
+步骤3: CH08 真实推理
+  CH08 4000M ──[SR模型]──→ CH08 SR 2000M（定性评估）
 ```
 
-### 与 autoresearch 的对应
+**退化模型组成**：
+1. **PSF 模糊**: 高斯核，σ 从 CH07 数据校准（估计 σ≈0.5-1.0 像素）
+2. **2× 下采样**: 平均池化（匹配天然 2×2 detector binning）
+3. **噪声注入**: 从 CH07 4000M 残差统计校准（σ_noise≈0.1-0.4 K）
 
-| autoresearch | 本架构对应 | 说明 |
-|--------------|-----------|------|
-| `train.py` | `lv2_micro/experiments/*/main.py` | 单一文件迭代 |
-| `prepare.py` | `utils.py` + `data/` | 固定工具 |
-| `program.md` | `program.md` + `ARCHITECTURE.md` | 任务定义 |
-| `val_bpb` 指标 | `val_psnr` | 单一核心指标 |
-| git commit/reset | `lv2_micro` 层使用 | 微观决策 |
-| 永不停止 | `run_experiment.sh` | 自动化循环 |
+### 三层实验架构（v2，已根据数据事实修正）
 
-## 三层详解
-
-### lv1_macro - 宏观层
-
-**目标**：横向比较不同超分辨率方法，找出最适合 FY4B 数据的架构。
-
-**目录**：`lv1_macro/methods/`
-
-**方法列表**（编号优先级）：
 ```
-01_baseline_bicubic/    # 双三次插值基线
-02_baseline_srcnn/      # SRCNN (2015)
-03_method_edsr/         # EDSR (2017)
-04_method_pftsr/        # PFT-SR (自定义)
-05_method_swinir/       # SwinIR (2021)
+┌──────────────────────────────────────────────────────────────────┐
+│     lv1_macro（已完成）      lv2_lv3（已完成）     CH08验证（修正） │
+│     ==================      ==================     ============= │
+│     29+方法收集+适配          统一200ep深度训练    退化模型校准+验证│
+│     CH07真实配对训练          Top-10 >44dB PSNR   合成测试集评估   │
+│                              checkpoint保存       真实CH08推理     │
+└──────────────────────────────────────────────────────────────────┘
 ```
-
-**使用**：
-```bash
-# 运行所有方法比较
-python compare.py --level macro --band CH07
-
-# 输出: lv1_macro/results.csv
-# 自动选择最佳方法进入 lv2_micro
-python lv1_macro/select_best.py
-```
-
-**核心原则**：
-- 相同数据、相同预算（100 epoch）
-- 不修改方法内部，只调用统一接口
-- 单一指标 `val_psnr` 决策
-
-### lv2_micro - 微观层
-
-**目标**：在选定方法基础上，通过 autoresearch 模式找到最优超参数。
-
-**目录**：`lv2_micro/experiments/`
-
-**工作方式**（autoresearch 模式）：
-```bash
-cd lv2_micro
-
-# 初始化基线
-./run_experiment.sh CH07 20260412_baseline "edsr baseline"
-
-# 迭代优化（永不停止）
-while true; do
-    # 修改 experiments/<name>/main.py
-    ./run_experiment.sh CH07 <new_experiment> <description>
-    # 自动记录到 results.tsv
-    # 好则保留，差则丢弃
-done
-```
-
-**可调参数**：
-- 学习率 (LR): 1e-5 ~ 1e-3
-- 模型深度 (NUM_PFT_BLOCKS): 2 ~ 5
-- 特征维度 (NUM_FEATURES): 32, 64, 128
-- 损失权重 (LAMBDA_L1, LAMBDA_SSIM)
-- 批次大小 (BATCH_SIZE): 4, 8, 16
-
-**核心原则**：
-- 完全遵循 autoresearch 工作流
-- 单一文件 (`main.py`) 修改
-- git commit/reset 决策
-- 永不停止直到人为中断
-
-### lv3_fusion - 融合层（可选）
-
-**目标**：当 lv1 中多个方法表现接近时，尝试融合获得更好性能。
-
-**触发条件**：top-2 方法 gap < 0.5 dB
-
-**策略**：
-- 输出级融合（快速验证）
-- 特征级融合（深度优化）
-- 多尺度融合
-
-**决策**：融合模型 > 最佳单一方法 + 0.3 dB 才保留
 
 ## 文件职责总览
 
@@ -140,25 +80,24 @@ done
 | `ARCHITECTURE.md` | 全局 | 参考 | 架构设计文档 |
 | `utils.py` | 全局 | **不可修改** | 固定工具函数 |
 | `data/` | 全局 | **不可修改** | 统一数据加载 |
-| `lv1_macro/methods/` | lv1 | 可添加 | 各方法实现 |
-| `lv1_macro/results.csv` | lv1 | 自动生成 | 比较结果 |
-| `lv2_micro/TARGET_METHOD` | lv2 | 自动写入 | 当前优化目标 |
-| `lv2_micro/experiments/` | lv2 | **可修改** | 实验目录（核心） |
-| `lv2_micro/results.tsv` | lv2 | 自动生成 | 实验记录 |
-| `lv3_fusion/` | lv3 | 可选 | 融合策略 |
+| `lv1_macro/methods/` | lv1 | 已归档 | 各方法实现 |
+| `lv2_micro/` | lv2 | 已归档 | 方法源码和训练结果 |
+| `lv3_fusion/` | lv3 | 已归档 | 融合规划（可选） |
+| `checkpoints/` | 产出 | 可用 | 3 个最佳模型权重 |
+| `scripts/degradation_model.py` | 验证 | **新增** | 退化模型校准与合成 |
+| `scripts/evaluate_ch08.py` | 验证 | **重写** | 修正后的 CH08 评估 |
+| `scripts/generate_products_fast.py` | 产出 | 已有 | 产品生成 |
 
 ## 评估指标
 
-**单一核心指标**: `val_psnr` (验证集 PSNR, 单位 dB)
-- **越高越好**
-- **所有层级统一使用此指标**
-- 基准线: ~30 dB (bicubic)
-- 目标: >35 dB
+**主指标**：
+- `val_psnr` (dB) — 验证集 PSNR
+- `val_ssim` — 结构相似性
 
-**辅助指标** (仅参考):
-- `val_ssim`: 结构相似性
-- `model_params`: 模型参数量
-- `train_time`: 训练时间
+**修正说明**：
+- ⚠️ 此前报告的 44+ dB 是基于 CH07 真实配对数据的训练收敛值
+- CH08 合成测试集上的 PSNR 预计会显著低于此值（因为退化模拟引入不确定性）
+- 合成测试集的 PSNR 绝对值不重要，**方法间相对排名**才有意义
 
 ## 数据来源
 
@@ -166,58 +105,91 @@ done
 
 | 通道 | 高分辨率 (2km) | 低分辨率 (4km) |
 |------|----------------|----------------|
-| CH07 | `/root/autodl-tmp/Calibration-FY4B/2000M/CH07/` | `/root/autodl-tmp/Calibration-FY4B/4000M/CH07/` |
-| CH08 | `/root/autodl-tmp/Calibration-FY4B/2000M/CH08/` | `/root/autodl-tmp/Calibration-FY4B/4000M/CH08/` |
+| CH07 | `/root/autodl-tmp/Calibration-FY4B/2000M/CH07/`（原生） | `/root/autodl-tmp/Calibration-FY4B/4000M/CH07/`（原生） |
+| CH08 | ❌ 无原生数据（2000M 为内插） | `/root/autodl-tmp/Calibration-FY4B/4000M/CH08/`（原生） |
 
-## 完整工作流程
+## 完整工作流程（修正版）
 
 ```bash
-# 阶段1：宏观比较（1-2天）
-python compare.py --level macro --band CH07
-# → 选择最佳方法（如 03_edsr）
+# ══════════════════════════════════════════════════
+# 阶段 0: 校准退化模型（新）
+# ══════════════════════════════════════════════════
+python scripts/degradation_model.py --calibrate
+  # 输入: CH07 真实 2000M/4000M 配对
+  # 输出: PSF 核参数、噪声模型
 
-# 阶段2：微观优化（3-5天，autoresearch模式）
-cd lv2_micro
-./run_experiment.sh CH07 20260412_baseline "baseline"
-# → 持续迭代，记录到 results.tsv
-# → 直到收敛或人为停止
+# ══════════════════════════════════════════════════
+# 阶段 1: CH07 训练 ✅ 已完成
+# ══════════════════════════════════════════════════
+# 29+ 方法统一 200 epoch 训练
+# Top-10 选定，checkpoint 保存
 
-# 阶段3：融合创新（可选，1-2天）
-cd ../lv3_fusion
-# 如果触发条件满足
-python fusion.py --methods edsr,pftsr
+# ══════════════════════════════════════════════════
+# 阶段 2: CH08 验证（修正）
+# ══════════════════════════════════════════════════
+python scripts/evaluate_ch08.py --synthetic
+  # 基于退化模型构建 CH08 合成测试集
+  # 评估 Top-10 方法排名
 
-# 阶段4：验证与输出
-python compare.py --all --band CH08  # 在CH08验证
-python visualize.py --all            # 生成对比图
+# ══════════════════════════════════════════════════
+# 阶段 3: CH08 真实推理
+# ══════════════════════════════════════════════════
+python scripts/generate_products_fast.py --band CH08
+  # 在真实 CH08 4000M 上运行 SR
+  # 定性评估（无 ground truth）
+
+# ══════════════════════════════════════════════════
+# 阶段 4: LV3 融合（可选）
+# ══════════════════════════════════════════════════
+# 基于修正后的 CH08 排名决定是否融合
 ```
 
 ## 待办事项
 
-- [x] 调研 FY-4B 卫星数据特点
-- [x] 调研超分辨率算法
-- [x] 搭建基础训练框架
-- [x] 实现 PFT-SR 基础模型
-- [ ] **lv1_macro**: 收集并适配所有候选方法
-- [ ] **lv1_macro**: 运行宏观比较，选择最佳方法
-- [ ] **lv2_micro**: 进入 autoresearch 优化模式
-- [ ] **lv2_micro**: 达到 >35 dB PSNR
-- [ ] **lv3_fusion** (可选): 尝试方法融合
-- [ ] 在 CH08 通道验证泛化性
+### 已完成
+- [x] 29+ 种超分方法收集与适配
+- [x] CH07 原生 2000M/4000M 定标与配对
+- [x] 24 种方法统一 200 epoch 深度训练（CH07）
+- [x] Top-10 选定（含 TOP10_SELECTION.md）
+- [x] 3 个最佳 checkpoint 保存
+- [x] CH07 产品生成（patch-based 全盘推理）
+- [x] 数据事实纠正：CH08 2000M 为内插，non-native
+
+### 进行中
+- [ ] **退化模型校准**：基于 CH07 真实配对估算 PSF + 噪声参数
+- [ ] **CH08 合成测试集**：构建合成 LR/HR 对用于定量评估
+
+### 待办
+- [ ] 修正 CH08 评估（基于合成测试集）
+- [ ] 生成 CH08 SR 产品（真实 4000M 推理，定性评估）
+- [ ] 生成对比可视化（CH07 + CH08）
+- [ ] LV3 融合（根据修正后排名决定）
+- [ ] 清理低分方法（排名 11-24，可选）
 
 ## 实验记录
 
-| 日期 | 层级 | 实验 | val_psnr | 说明 |
-|------|------|------|----------|------|
-| 2026-04-12 | lv1 | 01_bicubic | 30.2 | 基线 |
-| 2026-04-12 | lv1 | 02_srcnn | - | 待运行 |
-| 2026-04-12 | lv1 | 03_edsr | - | 待运行 |
-| 2026-04-12 | lv1 | 04_pftsr | 33.8 | 当前最佳候选 |
+### CH07 真实配对训练（已完成）
+
+| 排名 | 方法 | val_psnr | val_ssim | 参数量 | 说明 |
+|:---:|:---|:---:|:---:|:---:|:---|
+| 1 | EmambaIR | 44.42 | 0.9803 | 890,889 | CH07 真实配对 |
+| 2 | PFTSR | 44.35 | 0.9816 | 1,000,103 | CH07 真实配对 |
+| 3 | DualScaleRestorer | 44.34 | 0.9803 | 1,586,415 | CH07 真实配对 |
+| ... | ... | ... | ... | ... | ... |
+
+> 注：以上 PSNR 基于 CH07 真实配对，不代表 CH08 泛化性能
+
+### CH08 修正评估（待执行）
+
+| 日期 | 方法 | 合成测试 PSNR | 说明 |
+|------|:---|:---:|:---|
+| - | EmambaIR | - | 待评估 |
+| - | PFTSR | - | 待评估 |
+| - | bicubic | - | 基线 |
 
 ## 参考
 
-- [ARCHITECTURE.md](ARCHITECTURE.md) - 详细架构设计
-- [lv1_macro/README.md](lv1_macro/README.md) - 宏观层说明
-- [lv2_micro/README.md](lv2_micro/README.md) - 微观层说明（autoresearch）
-- [autoresearch](https://github.com/karpathy/autoresearch) - 原始灵感
-- [PFT-SR](https://github.com/CVL-UESTC/PFT-SR) - 基础模型
+- [ARCHITECTURE.md](ARCHITECTURE.md) - 架构设计文档
+- [TOP10_SELECTION.md](lv3_fusion/TOP10_SELECTION.md) - Top-10 选定
+- [UNIFIED_EVALUATION.md](lv3_fusion/UNIFIED_EVALUATION.md) - 评估报告
+- [task_summary.md](results/task_summary.md) - 完整任务总结

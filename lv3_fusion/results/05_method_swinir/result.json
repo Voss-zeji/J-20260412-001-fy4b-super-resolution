@@ -1,0 +1,47 @@
+{
+  "method": "05_method_swinir",
+  "band": "CH07",
+  "val_psnr": 44.15,
+  "val_ssim": 0.9799,
+  "val_rmse": 0.007,
+  "train_time": 4958.18,
+  "train_epochs": 200,
+  "model_params": 406441,
+  "model_size_mb": 1.55,
+  "inference_time_ms": 20.73,
+  "status": "success",
+  "timestamp": "2026-05-23T00:21:16",
+  "runtime_seconds": 4989.319385,
+  "start_time": "2026-05-22 22:58:08",
+  "end_time": "2026-05-23 00:21:17",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0057,
+      "timestamp": "2026-05-22 23:18:55"
+    },
+    {
+      "epoch": 100,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0048,
+      "timestamp": "2026-05-22 23:39:38"
+    },
+    {
+      "epoch": 150,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0057,
+      "timestamp": "2026-05-23 00:00:10"
+    },
+    {
+      "epoch": 200,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0046,
+      "timestamp": "2026-05-23 00:20:52"
+    }
+  ]
+}

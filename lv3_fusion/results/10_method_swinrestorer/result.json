@@ -1,0 +1,47 @@
+{
+  "method": "10_method_swinrestorer",
+  "band": "CH07",
+  "val_psnr": 44.16,
+  "val_ssim": 0.9798,
+  "val_rmse": 0.007,
+  "train_time": 4800.09,
+  "train_epochs": 200,
+  "model_params": 581020,
+  "model_size_mb": 2.22,
+  "inference_time_ms": 28.43,
+  "status": "success",
+  "timestamp": "2026-05-23T04:27:16",
+  "runtime_seconds": 4829.614305,
+  "start_time": "2026-05-23 03:06:47",
+  "end_time": "2026-05-23 04:27:17",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0051,
+      "timestamp": "2026-05-23 03:26:48"
+    },
+    {
+      "epoch": 100,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0052,
+      "timestamp": "2026-05-23 03:46:46"
+    },
+    {
+      "epoch": 150,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0044,
+      "timestamp": "2026-05-23 04:06:44"
+    },
+    {
+      "epoch": 200,
+      "psnr": 0.0,
+      "ssim": 0.0,
+      "loss": 0.0048,
+      "timestamp": "2026-05-23 04:26:54"
+    }
+  ]
+}

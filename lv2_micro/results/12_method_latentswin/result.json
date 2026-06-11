@@ -1,0 +1,17 @@
+{
+  "method": "12_method_latentswin",
+  "band": "CH07",
+  "val_psnr": 43.65,
+  "val_ssim": 0.9787,
+  "val_rmse": 0.0075,
+  "train_time": 61.4,
+  "train_epochs": 10,
+  "model_params": 5058785,
+  "model_size_mb": 19.3,
+  "inference_time_ms": 38.82,
+  "status": "success",
+  "timestamp": "2026-04-26T20:14:44",
+  "runtime_seconds": 71.890273,
+  "start_time": "2026-04-26 20:13:33",
+  "end_time": "2026-04-26 20:14:45"
+}

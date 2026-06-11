@@ -1,0 +1,17 @@
+{
+  "method": "03_method_edsr",
+  "band": "CH07",
+  "val_psnr": 42.79,
+  "val_ssim": 0.981,
+  "val_rmse": 0.0078,
+  "train_time": 346.05,
+  "train_epochs": 50,
+  "model_params": 1367553,
+  "model_size_mb": 5.22,
+  "inference_time_ms": 20.52,
+  "status": "success",
+  "timestamp": "2026-04-25T11:12:18",
+  "runtime_seconds": 354.434443,
+  "start_time": "2026-04-25 11:06:24",
+  "end_time": "2026-04-25 11:12:19"
+}

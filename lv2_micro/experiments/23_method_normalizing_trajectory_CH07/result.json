@@ -1,0 +1,10 @@
+{
+  "method": "23_method_normalizing_trajectory",
+  "band": "CH07",
+  "status": "partial",
+  "train_epochs": 0,
+  "val_psnr": null,
+  "runtime_seconds": 0.024448,
+  "start_time": "2026-05-13 07:48:17",
+  "end_time": "2026-05-13 07:48:17"
+}

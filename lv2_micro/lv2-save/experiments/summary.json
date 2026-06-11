@@ -1,0 +1,97 @@
+{
+  "total_methods": 11,
+  "completed": 11,
+  "band": "CH07",
+  "max_epochs": 50,
+  "timeout_minutes": 30,
+  "results": [
+    {
+      "method": "10_method_swinrestorer",
+      "status": "success",
+      "best_psnr": 44.03,
+      "best_ssim": 0.9809,
+      "runtime_seconds": 1230.021975,
+      "epochs": 0
+    },
+    {
+      "method": "14_method_dualscalerestore",
+      "status": "success",
+      "best_psnr": 43.8,
+      "best_ssim": 0.9781,
+      "runtime_seconds": 1258.080219,
+      "epochs": 0
+    },
+    {
+      "method": "11_method_edgepft",
+      "status": "success",
+      "best_psnr": 43.73,
+      "best_ssim": 0.976,
+      "runtime_seconds": 1237.504288,
+      "epochs": 0
+    },
+    {
+      "method": "17_method_emambair",
+      "status": "partial",
+      "best_psnr": 43.67,
+      "best_ssim": null,
+      "runtime_seconds": 1800.184665,
+      "epochs": 12
+    },
+    {
+      "method": "13_method_mambapft",
+      "status": "success",
+      "best_psnr": 43.49,
+      "best_ssim": 0.9789,
+      "runtime_seconds": 1402.501301,
+      "epochs": 0
+    },
+    {
+      "method": "12_method_latentswin",
+      "status": "success",
+      "best_psnr": 43.36,
+      "best_ssim": 0.9765,
+      "runtime_seconds": 1243.055708,
+      "epochs": 0
+    },
+    {
+      "method": "15_method_ntire2026_ir_sr",
+      "status": "partial",
+      "best_psnr": 42.85,
+      "best_ssim": null,
+      "runtime_seconds": 1800.187767,
+      "epochs": 12
+    },
+    {
+      "method": "18_method_gprof_ir",
+      "status": "partial",
+      "best_psnr": 42.67,
+      "best_ssim": null,
+      "runtime_seconds": 1800.211247,
+      "epochs": 12
+    },
+    {
+      "method": "19_method_impa_net",
+      "status": "partial",
+      "best_psnr": 42.4,
+      "best_ssim": null,
+      "runtime_seconds": 1800.211581,
+      "epochs": 12
+    },
+    {
+      "method": "16_method_weather_sr",
+      "status": "partial",
+      "best_psnr": 32.8,
+      "best_ssim": null,
+      "runtime_seconds": 1800.185398,
+      "epochs": 11
+    },
+    {
+      "method": "20_method_multispectral_sr",
+      "status": "partial",
+      "best_psnr": 29.94,
+      "best_ssim": null,
+      "runtime_seconds": 1800.202902,
+      "epochs": 12
+    }
+  ]
+}

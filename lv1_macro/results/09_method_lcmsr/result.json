@@ -1,0 +1,17 @@
+{
+  "method": "09_method_lcmsr",
+  "band": "CH07",
+  "val_psnr": 43.77,
+  "val_ssim": 0.9768,
+  "val_rmse": 0.0075,
+  "train_time": 350.0,
+  "train_epochs": 50,
+  "model_params": 2753833,
+  "model_size_mb": 10.51,
+  "inference_time_ms": 17.57,
+  "status": "success",
+  "timestamp": "2026-04-25T12:13:40",
+  "runtime_seconds": 358.909866,
+  "start_time": "2026-04-25 12:07:42",
+  "end_time": "2026-04-25 12:13:41"
+}

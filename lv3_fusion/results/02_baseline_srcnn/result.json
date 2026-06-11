@@ -1,0 +1,49 @@
+{
+  "method": "02_baseline_srcnn",
+  "band": "CH07",
+  "val_psnr": 38.28,
+  "val_ssim": 0.9467,
+  "val_rmse": 0.013,
+  "train_time": 4899.94,
+  "train_epochs": 200,
+  "model_params": 8129,
+  "model_size_mb": 0.03,
+  "inference_time_ms": 18.28,
+  "status": "success",
+  "timestamp": "2026-05-23T16:40:47",
+  "runtime_seconds": 4930.226566,
+  "runtime_minutes": 82.2,
+  "runtime_hours": 1.37,
+  "start_time": "2026-05-23 15:18:38",
+  "end_time": "2026-05-23 16:40:48",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 30.54,
+      "ssim": 0.8667,
+      "loss": 0.001,
+      "timestamp": "2026-05-23 15:38:52"
+    },
+    {
+      "epoch": 100,
+      "psnr": 34.81,
+      "ssim": 0.9129,
+      "loss": 0.0005,
+      "timestamp": "2026-05-23 15:59:11"
+    },
+    {
+      "epoch": 150,
+      "psnr": 37.24,
+      "ssim": 0.938,
+      "loss": 0.0003,
+      "timestamp": "2026-05-23 16:19:43"
+    },
+    {
+      "epoch": 200,
+      "psnr": 38.28,
+      "ssim": 0.9467,
+      "loss": 0.0003,
+      "timestamp": "2026-05-23 16:40:24"
+    }
+  ]
+}

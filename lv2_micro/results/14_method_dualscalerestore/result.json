@@ -1,0 +1,17 @@
+{
+  "method": "14_method_dualscalerestore",
+  "band": "CH07",
+  "val_psnr": 44.51,
+  "val_ssim": 0.9804,
+  "val_rmse": 0.0069,
+  "train_time": 126.03,
+  "train_epochs": 10,
+  "model_params": 1586415,
+  "model_size_mb": 6.05,
+  "inference_time_ms": 35.67,
+  "status": "success",
+  "timestamp": "2026-04-26T17:20:20",
+  "runtime_seconds": 135.323488,
+  "start_time": "2026-04-26 17:18:06",
+  "end_time": "2026-04-26 17:20:21"
+}

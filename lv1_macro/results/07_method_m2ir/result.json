@@ -1,0 +1,10 @@
+{
+  "method": "07_method_m2ir",
+  "band": "CH07",
+  "status": "partial",
+  "train_epochs": 20,
+  "val_psnr": 33.42,
+  "runtime_seconds": 1800.178187,
+  "start_time": "2026-04-25 11:31:08",
+  "end_time": "2026-04-25 12:01:08"
+}

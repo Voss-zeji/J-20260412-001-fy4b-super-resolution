@@ -1,0 +1,17 @@
+{
+  "method": "11_method_edgepft",
+  "band": "CH07",
+  "val_psnr": 43.73,
+  "val_ssim": 0.976,
+  "val_rmse": 0.0076,
+  "train_time": 1207.8,
+  "train_epochs": 50,
+  "model_params": 94287,
+  "model_size_mb": 0.36,
+  "inference_time_ms": 20.33,
+  "status": "success",
+  "timestamp": "2026-05-20T11:49:24",
+  "runtime_seconds": 1237.504288,
+  "start_time": "2026-05-20 11:28:47",
+  "end_time": "2026-05-20 11:49:24"
+}

@@ -1,0 +1,49 @@
+{
+  "method": "09_method_lcmsr",
+  "band": "CH07",
+  "val_psnr": 43.63,
+  "val_ssim": 0.9766,
+  "val_rmse": 0.0075,
+  "train_time": 4883.71,
+  "train_epochs": 200,
+  "model_params": 2753833,
+  "model_size_mb": 10.51,
+  "inference_time_ms": 23.8,
+  "status": "success",
+  "timestamp": "2026-05-23T20:59:24",
+  "runtime_seconds": 4913.770296,
+  "runtime_minutes": 81.9,
+  "runtime_hours": 1.36,
+  "start_time": "2026-05-23 19:37:31",
+  "end_time": "2026-05-23 20:59:25",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 43.36,
+      "ssim": 0.9778,
+      "loss": 0.0054,
+      "timestamp": "2026-05-23 19:57:53"
+    },
+    {
+      "epoch": 100,
+      "psnr": 43.58,
+      "ssim": 0.9768,
+      "loss": 0.0047,
+      "timestamp": "2026-05-23 20:18:17"
+    },
+    {
+      "epoch": 150,
+      "psnr": 43.57,
+      "ssim": 0.9775,
+      "loss": 0.0048,
+      "timestamp": "2026-05-23 20:38:51"
+    },
+    {
+      "epoch": 200,
+      "psnr": 43.63,
+      "ssim": 0.9766,
+      "loss": 0.0057,
+      "timestamp": "2026-05-23 20:59:01"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "method": "CH07_synthetic_evaluation",
+  "degradation_params": {
+    "psf_sigma": 0.384,
+    "noise_std": 0.4355
+  },
+  "real_ranking": {
+    "EmambaIR": 44.42,
+    "PFTSR": 44.35,
+    "DualScaleRestorer": 44.34,
+    "SFGSwinIR": 44.3,
+    "DualBranchEmambaIR": 44.28,
+    "PhysicsPFTSR": 44.17
+  },
+  "synth_ranking": {
+    "EmambaIR": 5.56,
+    "PFTSR": 5.56,
+    "DualScaleRestorer": 5.56,
+    "SFGSwinIR": 5.56,
+    "DualBranchEmambaIR": 5.56,
+    "PhysicsPFTSR": 5.56
+  },
+  "ranking_agreement_pct": 100.0,
+  "generated_at": "2026-06-10 08:44:59"
+}

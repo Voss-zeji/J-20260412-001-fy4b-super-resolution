@@ -1,0 +1,49 @@
+{
+  "method": "12_method_latentswin",
+  "band": "CH07",
+  "val_psnr": 43.6,
+  "val_ssim": 0.9766,
+  "val_rmse": 0.0075,
+  "train_time": 4954.36,
+  "train_epochs": 200,
+  "model_params": 5058785,
+  "model_size_mb": 19.3,
+  "inference_time_ms": 64.38,
+  "status": "success",
+  "timestamp": "2026-05-23T22:22:29",
+  "runtime_seconds": 4985.260029,
+  "runtime_minutes": 83.1,
+  "runtime_hours": 1.38,
+  "start_time": "2026-05-23 20:59:25",
+  "end_time": "2026-05-23 22:22:31",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 43.47,
+      "ssim": 0.9779,
+      "loss": 0.0052,
+      "timestamp": "2026-05-23 21:19:58"
+    },
+    {
+      "epoch": 100,
+      "psnr": 43.55,
+      "ssim": 0.9768,
+      "loss": 0.0043,
+      "timestamp": "2026-05-23 21:40:07"
+    },
+    {
+      "epoch": 150,
+      "psnr": 43.6,
+      "ssim": 0.9767,
+      "loss": 0.0053,
+      "timestamp": "2026-05-23 22:01:11"
+    },
+    {
+      "epoch": 200,
+      "psnr": 43.6,
+      "ssim": 0.9766,
+      "loss": 0.0059,
+      "timestamp": "2026-05-23 22:22:06"
+    }
+  ]
+}

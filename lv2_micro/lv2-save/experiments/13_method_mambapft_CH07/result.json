@@ -1,0 +1,17 @@
+{
+  "method": "13_method_mambapft",
+  "band": "CH07",
+  "val_psnr": 43.49,
+  "val_ssim": 0.9789,
+  "val_rmse": 0.0075,
+  "train_time": 1372.67,
+  "train_epochs": 50,
+  "model_params": 1215399,
+  "model_size_mb": 4.64,
+  "inference_time_ms": 66.49,
+  "status": "success",
+  "timestamp": "2026-05-20T12:33:29",
+  "runtime_seconds": 1402.501301,
+  "start_time": "2026-05-20 12:10:07",
+  "end_time": "2026-05-20 12:33:30"
+}

@@ -1,0 +1,15 @@
+{
+  "method": "31_method_sfg_swinir",
+  "band": "CH07",
+  "best_psnr": 44.2983,
+  "best_ssim": 0.9801,
+  "best_epoch": 176,
+  "final_psnr": 44.2983,
+  "final_ssim": 0.9801,
+  "train_epochs": 200,
+  "model_params": 601081,
+  "inference_time_ms": 23.22,
+  "train_time": 8482.17,
+  "status": "success",
+  "timestamp": "2026-06-07T04:30:36"
+}

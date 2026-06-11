@@ -1,0 +1,10 @@
+{
+  "method": "18_method_gprof_ir",
+  "band": "CH07",
+  "status": "partial",
+  "epochs": 12,
+  "best_psnr": 42.67,
+  "runtime_seconds": 1800.211247,
+  "start_time": "2026-05-20 14:24:29",
+  "end_time": "2026-05-20 14:54:29"
+}

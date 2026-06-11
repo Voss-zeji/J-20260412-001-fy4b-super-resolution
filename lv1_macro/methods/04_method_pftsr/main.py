@@ -385,6 +385,7 @@ def main():
 
     with open(args.output, 'w') as f:
         json.dump(result, f, indent=2)
+    torch.save(model.state_dict(), args.output.replace(".json", "_best.pth"))
 
     print("\n" + "=" * 60)
     print("训练完成!")

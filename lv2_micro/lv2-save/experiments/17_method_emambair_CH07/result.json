@@ -1,0 +1,10 @@
+{
+  "method": "17_method_emambair",
+  "band": "CH07",
+  "status": "partial",
+  "epochs": 12,
+  "best_psnr": 43.67,
+  "runtime_seconds": 1800.184665,
+  "start_time": "2026-05-20 13:54:28",
+  "end_time": "2026-05-20 14:24:29"
+}

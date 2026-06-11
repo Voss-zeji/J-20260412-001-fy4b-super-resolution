@@ -1,0 +1,46 @@
+{
+  "method": "16_method_weather_sr",
+  "band": "CH07",
+  "epochs": 200,
+  "best_psnr": 41.77897126416338,
+  "best_ssim": 0.9705508476495743,
+  "best_epoch": 185,
+  "status": "success",
+  "final_psnr": 41.698013877286456,
+  "final_ssim": 0.9697723239660263,
+  "runtime_seconds": 29133.279715,
+  "runtime_minutes": 485.6,
+  "runtime_hours": 8.09,
+  "start_time": "2026-05-24 08:11:30",
+  "end_time": "2026-05-24 16:17:04",
+  "snapshots": [
+    {
+      "epoch": 50,
+      "psnr": 38.0,
+      "ssim": 0.9418,
+      "loss": 0.0004,
+      "timestamp": "2026-05-24 10:13:57"
+    },
+    {
+      "epoch": 100,
+      "psnr": 40.87,
+      "ssim": 0.9659,
+      "loss": 0.0002,
+      "timestamp": "2026-05-24 12:16:31"
+    },
+    {
+      "epoch": 150,
+      "psnr": 41.44,
+      "ssim": 0.9694,
+      "loss": 0.0003,
+      "timestamp": "2026-05-24 14:17:18"
+    },
+    {
+      "epoch": 200,
+      "psnr": 41.7,
+      "ssim": 0.9698,
+      "loss": 0.0002,
+      "timestamp": "2026-05-24 16:17:02"
+    }
+  ]
+}

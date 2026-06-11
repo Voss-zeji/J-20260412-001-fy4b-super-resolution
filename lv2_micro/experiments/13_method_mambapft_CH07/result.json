@@ -1,0 +1,10 @@
+{
+  "method": "13_method_mambapft",
+  "band": "CH07",
+  "status": "partial",
+  "train_epochs": 10,
+  "val_psnr": 43.56,
+  "runtime_seconds": 1800.1692,
+  "start_time": "2026-04-26 20:42:17",
+  "end_time": "2026-04-26 21:12:18"
+}

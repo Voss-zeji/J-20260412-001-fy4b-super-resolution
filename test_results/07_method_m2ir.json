@@ -1,0 +1,14 @@
+{
+  "method": "07_method_m2ir",
+  "band": "CH07",
+  "val_psnr": 6.74,
+  "val_ssim": 0.0377,
+  "val_rmse": 0.4638,
+  "train_time": 66.24,
+  "train_epochs": 2,
+  "model_params": 328993,
+  "model_size_mb": 1.26,
+  "inference_time_ms": 165.01,
+  "status": "success",
+  "timestamp": "2026-04-14T13:52:20"
+}
