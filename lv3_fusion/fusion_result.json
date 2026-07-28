@@ -1,0 +1,26 @@
+{
+  "individual": {
+    "EmambaIR": {
+      "psnr": 43.65,
+      "ssim": 0.978
+    },
+    "SFGSwinIR": {
+      "psnr": 43.54,
+      "ssim": 0.9778
+    },
+    "PFTSR": {
+      "psnr": 43.61,
+      "ssim": 0.9779
+    },
+    "DualScaleRestorer": {
+      "psnr": 43.58,
+      "ssim": 0.9778
+    }
+  },
+  "ensemble": {
+    "method": "EmambaIR + SFGSwinIR",
+    "psnr": 43.62,
+    "ssim": 0.978
+  },
+  "generated_at": "2026-06-23 10:26:16"
+}
